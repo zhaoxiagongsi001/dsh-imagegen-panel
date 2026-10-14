@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Image generation",
+    "description": "Adds an Image generation entry above Plugins in the sidebar: write a prompt, optionally attach reference images, then generate, preview, save, and browse history without leaving the panel."
+  }
+}

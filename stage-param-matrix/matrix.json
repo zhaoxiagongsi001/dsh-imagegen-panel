@@ -1,0 +1,2079 @@
+{
+  "generatedAt": "2026-10-11T01:11:33.909Z",
+  "base": "https://openrouter.ai/api/v1",
+  "modelCount": 59,
+  "availableCount": 58,
+  "unserved": [
+    "meta/muse-image"
+  ],
+  "rows": [
+    {
+      "id": "google/gemini-nano-banana-2.1",
+      "name": "Google: Nano Banana 2.1",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Google AI Studio"
+      ],
+      "params": {
+        "resolution": "enum(1K|2K|4K)",
+        "aspect_ratio": "enum(1:1|1:4|1:8|2:3|3:2|3:4|4:1|4:3|4:5|5:4|8:1|9:16|16:9|21:9)",
+        "n": "range(1..1)",
+        "input_references": "range(0..14)"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "google-ai-studio",
+          "params": [
+            "cachedContent"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "tencent/hy-image-v3.5-preview",
+      "name": "Tencent: Hy Image 3.5 Preview",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Tencent Cloud"
+      ],
+      "params": {
+        "resolution": "enum(1K|1.5K|2K|4K)",
+        "aspect_ratio": "enum(1:1|1:2|1:4|2:1|2:3|3:2|3:4|4:1|4:3|4:5|5:4|9:16|16:9)",
+        "n": "range(1..1)",
+        "input_references": "range(0..20)",
+        "seed": "boolean",
+        "size": "boolean"
+      },
+      "paramCount": 6,
+      "references": {
+        "min": 0,
+        "max": 20
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [],
+      "error": ""
+    },
+    {
+      "id": "bytedance-seed/seedream-5-0-flash",
+      "name": "ByteDance Seed: Seedream 5.0 Flash",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Seed"
+      ],
+      "params": {
+        "resolution": "enum(1K|2K)",
+        "aspect_ratio": "enum(1:1|1:2|2:1|2:3|3:2|3:4|4:3|4:5|5:4|9:16|16:9|9:19.5|19.5:9|9:20|20:9|9:21|21:9|auto)",
+        "n": "range(1..1)",
+        "input_references": "range(0..14)",
+        "seed": "boolean"
+      },
+      "paramCount": 5,
+      "references": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [],
+      "error": ""
+    },
+    {
+      "id": "black-forest-labs/flux-3-image",
+      "name": "Black Forest Labs: FLUX.3 Image",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Black Forest Labs"
+      ],
+      "params": {
+        "resolution": "enum(768|1K|1.5K|2K|4K)",
+        "aspect_ratio": "enum(21:9|2:1|16:9|3:2|7:5|4:3|5:4|1:1|4:5|3:4|5:7|2:3|9:16|1:2|9:21|auto)",
+        "n": "range(1..1)",
+        "input_references": "range(0..10)"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 10
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 10
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "black-forest-labs",
+          "params": [
+            "safety_tolerance"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "inclusionai/ming-image-0.1-design-layer",
+      "name": "inclusionAI: Ming Image 0.1 Design Layer",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "NovitaAI"
+      ],
+      "params": {
+        "output_format": "enum(png|webp)",
+        "n": "range(1..1)",
+        "input_references": "range(1..1)",
+        "size": "boolean"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 1,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 1,
+        "max": 1
+      },
+      "referencesRequired": true,
+      "supportsStreaming": false,
+      "providerOptions": [],
+      "error": ""
+    },
+    {
+      "id": "recraft/recraft-v4.1-flash",
+      "name": "Recraft: Recraft V4.1 Flash",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Recraft"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|16:9|9:16|auto)",
+        "n": "range(1..6)"
+      },
+      "paramCount": 2,
+      "references": {
+        "min": 0,
+        "max": 0
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 0
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "recraft",
+          "params": [
+            "controls"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "inclusionai/ming-image-0.1-design",
+      "name": "inclusionAI: Ming Image 0.1 Design",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "NovitaAI"
+      ],
+      "params": {
+        "output_format": "enum(png|jpeg|webp)",
+        "n": "range(1..1)",
+        "input_references": "range(0..0)",
+        "size": "boolean"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 0
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 0
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [],
+      "error": ""
+    },
+    {
+      "id": "openai/gpt-image-2.5-sunburst",
+      "name": "OpenAI: GPT Image 2.5 Sunburst",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "OpenAI"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|3:2|2:3|4:3|3:4|16:9|9:16|21:9|auto)",
+        "quality": "enum(auto|low|medium|high|xhigh|max)",
+        "background": "enum(auto|transparent|opaque)",
+        "n": "range(1..10)",
+        "input_references": "range(0..16)",
+        "output_compression": "range(0..100)"
+      },
+      "paramCount": 6,
+      "references": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesRequired": false,
+      "supportsStreaming": true,
+      "providerOptions": [
+        {
+          "slug": "openai",
+          "params": [
+            "moderation"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "openai/gpt-image-2.5-flare",
+      "name": "OpenAI: GPT Image 2.5 Flare",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "OpenAI"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|3:2|2:3|4:3|3:4|16:9|9:16|21:9|auto)",
+        "quality": "enum(auto|low|medium|high|xhigh|max)",
+        "background": "enum(auto|transparent|opaque)",
+        "n": "range(1..10)",
+        "input_references": "range(0..16)",
+        "output_compression": "range(0..100)"
+      },
+      "paramCount": 6,
+      "references": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesRequired": false,
+      "supportsStreaming": true,
+      "providerOptions": [
+        {
+          "slug": "openai",
+          "params": [
+            "moderation"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "microsoft/mai-image-2.6",
+      "name": "Microsoft AI: MAI-Image-2.6",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Azure"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|16:9|9:16|3:2|2:3|auto)",
+        "n": "range(1..1)",
+        "input_references": "range(0..5)"
+      },
+      "paramCount": 3,
+      "references": {
+        "min": 0,
+        "max": 5
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 5
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "azure",
+          "params": [
+            "web_grounding"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "microsoft/mai-image-2.6-flash",
+      "name": "Microsoft AI: MAI-Image-2.6 Flash",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Azure"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|16:9|9:16|3:2|2:3|auto)",
+        "n": "range(1..1)",
+        "input_references": "range(0..5)"
+      },
+      "paramCount": 3,
+      "references": {
+        "min": 0,
+        "max": 5
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 5
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "azure",
+          "params": [
+            "web_grounding"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "meta/muse-image",
+      "name": "Meta: Muse Image",
+      "available": false,
+      "endpointCount": 0,
+      "providers": [],
+      "params": {},
+      "paramCount": 0,
+      "references": {
+        "min": 0,
+        "max": 0
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 0
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [],
+      "error": ""
+    },
+    {
+      "id": "recraft/recraft-v4-styles-pro",
+      "name": "Recraft: Recraft V4 Styles Pro",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Recraft"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|2:1|1:2|3:2|2:3|4:3|3:4|5:4|4:5|16:9|9:16|auto)",
+        "n": "range(1..6)",
+        "input_references": "range(1..10)"
+      },
+      "paramCount": 3,
+      "references": {
+        "min": 1,
+        "max": 10
+      },
+      "referencesEffective": {
+        "min": 1,
+        "max": 10
+      },
+      "referencesRequired": true,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "recraft",
+          "params": [
+            "style_id",
+            "style_match",
+            "controls",
+            "random_seed"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "recraft/recraft-v4-styles-vector",
+      "name": "Recraft: Recraft V4 Styles Vector",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Recraft"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|2:1|1:2|3:2|2:3|4:3|3:4|5:4|4:5|16:9|9:16|auto)",
+        "output_format": "enum(svg)",
+        "n": "range(1..6)",
+        "input_references": "range(1..10)"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 1,
+        "max": 10
+      },
+      "referencesEffective": {
+        "min": 1,
+        "max": 10
+      },
+      "referencesRequired": true,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "recraft",
+          "params": [
+            "style_id",
+            "style_match",
+            "controls",
+            "random_seed"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "recraft/recraft-v4-styles-pro-vector",
+      "name": "Recraft: Recraft V4 Styles Pro Vector",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Recraft"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|2:1|1:2|3:2|2:3|4:3|3:4|5:4|4:5|16:9|9:16|auto)",
+        "output_format": "enum(svg)",
+        "n": "range(1..6)",
+        "input_references": "range(1..10)"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 1,
+        "max": 10
+      },
+      "referencesEffective": {
+        "min": 1,
+        "max": 10
+      },
+      "referencesRequired": true,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "recraft",
+          "params": [
+            "style_id",
+            "style_match",
+            "controls",
+            "random_seed"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "recraft/recraft-v4-styles",
+      "name": "Recraft: Recraft V4 Styles",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Recraft"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|2:1|1:2|3:2|2:3|4:3|3:4|5:4|4:5|16:9|9:16|auto)",
+        "n": "range(1..6)",
+        "input_references": "range(1..10)"
+      },
+      "paramCount": 3,
+      "references": {
+        "min": 1,
+        "max": 10
+      },
+      "referencesEffective": {
+        "min": 1,
+        "max": 10
+      },
+      "referencesRequired": true,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "recraft",
+          "params": [
+            "style_id",
+            "style_match",
+            "controls",
+            "random_seed"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "bytedance-seed/seedream-5-0-lite",
+      "name": "ByteDance Seed: Seedream 5.0 Lite",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Seed"
+      ],
+      "params": {
+        "resolution": "enum(2K|4K)",
+        "aspect_ratio": "enum(1:1|1:2|2:1|2:3|3:2|3:4|4:3|4:5|5:4|9:16|16:9|9:19.5|19.5:9|9:20|20:9|9:21|21:9|auto)",
+        "n": "range(1..4)",
+        "input_references": "range(0..14)",
+        "seed": "boolean"
+      },
+      "paramCount": 5,
+      "references": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [],
+      "error": ""
+    },
+    {
+      "id": "bytedance-seed/seedream-5-0-pro",
+      "name": "ByteDance Seed: Seedream 5.0 Pro",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Seed"
+      ],
+      "params": {
+        "resolution": "enum(1K|2K)",
+        "aspect_ratio": "enum(1:1|1:2|2:1|2:3|3:2|3:4|4:3|4:5|5:4|9:16|16:9|9:19.5|19.5:9|9:20|20:9|9:21|21:9|auto)",
+        "n": "range(1..1)",
+        "input_references": "range(0..14)",
+        "seed": "boolean"
+      },
+      "paramCount": 5,
+      "references": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [],
+      "error": ""
+    },
+    {
+      "id": "x-ai/grok-imagine-image-2.0",
+      "name": "xAI: Grok Imagine Image 2.0",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "SpaceXAI"
+      ],
+      "params": {
+        "resolution": "enum(1K|2K)",
+        "aspect_ratio": "enum(1:1|3:4|4:3|9:16|16:9|2:3|3:2|9:19.5|19.5:9|9:20|20:9|1:2|2:1|auto)",
+        "quality": "enum(low|medium)",
+        "n": "range(1..1)",
+        "input_references": "range(0..3)"
+      },
+      "paramCount": 5,
+      "references": {
+        "min": 0,
+        "max": 3
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 3
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [],
+      "error": ""
+    },
+    {
+      "id": "qwen/qwen-image-3-pro",
+      "name": "Qwen: Qwen Image 3 Pro",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Alibaba Cloud Int."
+      ],
+      "params": {
+        "resolution": "enum(1K|2K)",
+        "aspect_ratio": "enum(1:1|1:2|1:4|2:1|2:3|3:2|3:4|4:1|4:3|4:5|5:4|9:16|16:9)",
+        "n": "range(1..6)",
+        "input_references": "range(0..4)",
+        "seed": "boolean"
+      },
+      "paramCount": 5,
+      "references": {
+        "min": 0,
+        "max": 4
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 4
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [],
+      "error": ""
+    },
+    {
+      "id": "qwen/qwen-image-3",
+      "name": "Qwen: Qwen Image 3",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Alibaba Cloud Int."
+      ],
+      "params": {
+        "resolution": "enum(1K|2K)",
+        "aspect_ratio": "enum(1:1|1:2|1:4|2:1|2:3|3:2|3:4|4:1|4:3|4:5|5:4|9:16|16:9)",
+        "n": "range(1..6)",
+        "input_references": "range(0..4)",
+        "seed": "boolean"
+      },
+      "paramCount": 5,
+      "references": {
+        "min": 0,
+        "max": 4
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 4
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [],
+      "error": ""
+    },
+    {
+      "id": "microsoft/mai-image-2.5-pro",
+      "name": "Microsoft AI: MAI-Image-2.5 Pro",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Azure"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|16:9|9:16|3:2|2:3|auto)",
+        "n": "range(1..1)",
+        "input_references": "range(0..1)"
+      },
+      "paramCount": 3,
+      "references": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [],
+      "error": ""
+    },
+    {
+      "id": "krea/krea-2-large",
+      "name": "Krea: Krea 2 Large",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Krea"
+      ],
+      "params": {
+        "resolution": "enum(1K)",
+        "aspect_ratio": "enum(1:1|4:3|3:2|16:9|4:5|2:3|9:16)",
+        "input_references": "range(0..1)",
+        "seed": "boolean"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "krea",
+          "params": [
+            "image_style_references",
+            "moodboards",
+            "styles",
+            "creativity",
+            "intensity",
+            "complexity",
+            "movement",
+            "strength"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "krea/krea-2-medium",
+      "name": "Krea: Krea 2 Medium",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Krea"
+      ],
+      "params": {
+        "resolution": "enum(1K)",
+        "aspect_ratio": "enum(1:1|4:3|3:2|16:9|4:5|2:3|9:16)",
+        "input_references": "range(0..1)",
+        "seed": "boolean"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "krea",
+          "params": [
+            "image_style_references",
+            "moodboards",
+            "styles",
+            "creativity",
+            "intensity",
+            "complexity",
+            "movement",
+            "strength"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "krea/krea-2-medium-turbo",
+      "name": "Krea: Krea 2 Medium Turbo",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Krea"
+      ],
+      "params": {
+        "resolution": "enum(1K)",
+        "aspect_ratio": "enum(1:1|4:3|3:2|16:9|4:5|2:3|9:16)",
+        "input_references": "range(0..1)",
+        "seed": "boolean"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "krea",
+          "params": [
+            "image_style_references",
+            "moodboards",
+            "styles",
+            "creativity",
+            "intensity",
+            "complexity",
+            "movement",
+            "strength"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "google/gemini-3.1-flash-lite-image",
+      "name": "Google: Nano Banana 2 Lite (Gemini 3.1 Flash Lite Image)",
+      "available": true,
+      "endpointCount": 2,
+      "providers": [
+        "Google Vertex",
+        "Google AI Studio"
+      ],
+      "params": {
+        "resolution": "enum(1K)",
+        "aspect_ratio": "enum(1:1|1:4|1:8|2:3|3:2|3:4|4:1|4:3|4:5|5:4|8:1|9:16|16:9|21:9)",
+        "n": "range(1..1)",
+        "input_references": "range(0..14)"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "google-vertex/global",
+          "params": [
+            "cachedContent"
+          ]
+        },
+        {
+          "slug": "google-ai-studio",
+          "params": [
+            "cachedContent"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "openai/gpt-image-2",
+      "name": "OpenAI: GPT Image 2",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "OpenAI"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|3:2|2:3|4:3|3:4|16:9|9:16|21:9|auto)",
+        "quality": "enum(auto|low|medium|high)",
+        "background": "enum(auto|opaque)",
+        "n": "range(1..10)",
+        "input_references": "range(0..16)",
+        "output_compression": "range(0..100)"
+      },
+      "paramCount": 6,
+      "references": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesRequired": false,
+      "supportsStreaming": true,
+      "providerOptions": [
+        {
+          "slug": "openai",
+          "params": [
+            "moderation"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "openai/gpt-image-1-mini",
+      "name": "OpenAI: GPT Image 1 Mini",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "OpenAI"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|3:2|2:3|auto)",
+        "quality": "enum(auto|low|medium|high)",
+        "background": "enum(auto|transparent|opaque)",
+        "n": "range(1..10)",
+        "input_references": "range(0..16)",
+        "output_compression": "range(0..100)"
+      },
+      "paramCount": 6,
+      "references": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesRequired": false,
+      "supportsStreaming": true,
+      "providerOptions": [
+        {
+          "slug": "openai",
+          "params": [
+            "moderation"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "openai/gpt-image-1",
+      "name": "OpenAI: GPT Image 1",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "OpenAI"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|3:2|2:3|auto)",
+        "quality": "enum(auto|low|medium|high)",
+        "background": "enum(auto|transparent|opaque)",
+        "n": "range(1..10)",
+        "input_references": "range(0..16)",
+        "output_compression": "range(0..100)"
+      },
+      "paramCount": 6,
+      "references": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesRequired": false,
+      "supportsStreaming": true,
+      "providerOptions": [
+        {
+          "slug": "openai",
+          "params": [
+            "moderation"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "google/gemini-3.1-flash-image",
+      "name": "Google: Nano Banana 2 (Gemini 3.1 Flash Image)",
+      "available": true,
+      "endpointCount": 2,
+      "providers": [
+        "Google AI Studio",
+        "Google Vertex"
+      ],
+      "params": {
+        "resolution": "enum(512|1K|2K|4K)",
+        "aspect_ratio": "enum(1:1|1:4|1:8|2:3|3:2|3:4|4:1|4:3|4:5|5:4|8:1|9:16|16:9|21:9)",
+        "n": "range(1..1)",
+        "input_references": "range(0..14)"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "google-ai-studio",
+          "params": [
+            "cachedContent"
+          ]
+        },
+        {
+          "slug": "google-vertex/global",
+          "params": [
+            "cachedContent"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "google/gemini-3-pro-image",
+      "name": "Google: Nano Banana Pro (Gemini 3 Pro Image)",
+      "available": true,
+      "endpointCount": 2,
+      "providers": [
+        "Google AI Studio",
+        "Google Vertex"
+      ],
+      "params": {
+        "resolution": "enum(1K|2K|4K)",
+        "aspect_ratio": "enum(1:1|2:3|3:2|3:4|4:3|4:5|5:4|9:16|16:9|21:9)",
+        "n": "range(1..1)",
+        "input_references": "range(0..14)"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "google-ai-studio/global",
+          "params": [
+            "cachedContent"
+          ]
+        },
+        {
+          "slug": "google-vertex/global",
+          "params": [
+            "cachedContent"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "sourceful/riverflow-v2.5-pro",
+      "name": "Sourceful: Riverflow V2.5 Pro",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Sourceful"
+      ],
+      "params": {
+        "resolution": "enum(1K|2K|4K)",
+        "aspect_ratio": "enum(1:1|4:3|3:4|3:2|2:3|16:9|9:16|21:9|auto)",
+        "output_format": "enum(png|jpeg|webp)",
+        "background": "enum(auto|transparent|opaque)",
+        "n": "range(1..1)",
+        "input_references": "range(0..10)"
+      },
+      "paramCount": 6,
+      "references": {
+        "min": 0,
+        "max": 10
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 10
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "sourceful",
+          "params": [
+            "font_inputs"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "sourceful/riverflow-v2.5-fast",
+      "name": "Sourceful: Riverflow V2.5 Fast",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Sourceful"
+      ],
+      "params": {
+        "resolution": "enum(1K|2K)",
+        "aspect_ratio": "enum(1:1|4:3|3:4|3:2|2:3|16:9|9:16|21:9|auto)",
+        "output_format": "enum(jpeg)",
+        "background": "enum(auto|transparent|opaque)",
+        "n": "range(1..1)",
+        "input_references": "range(0..4)"
+      },
+      "paramCount": 6,
+      "references": {
+        "min": 0,
+        "max": 4
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 4
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "sourceful",
+          "params": [
+            "font_inputs"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "microsoft/mai-image-2.5",
+      "name": "Microsoft AI: MAI-Image-2.5",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Azure"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|16:9|9:16|3:2|2:3|auto)",
+        "n": "range(1..1)",
+        "input_references": "range(0..1)"
+      },
+      "paramCount": 3,
+      "references": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [],
+      "error": ""
+    },
+    {
+      "id": "x-ai/grok-imagine-image-quality",
+      "name": "SpaceXAI: Grok Imagine Image Quality",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "SpaceXAI"
+      ],
+      "params": {
+        "resolution": "enum(1K|2K)",
+        "aspect_ratio": "enum(1:1|3:4|4:3|9:16|16:9|2:3|3:2|9:19.5|19.5:9|9:20|20:9|1:2|2:1|auto)",
+        "n": "range(1..1)",
+        "input_references": "range(0..3)"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 3
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 3
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [],
+      "error": ""
+    },
+    {
+      "id": "recraft/recraft-v4.1-pro-vector",
+      "name": "Recraft: Recraft V4.1 Pro Vector",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Recraft"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|16:9|9:16|auto)",
+        "output_format": "enum(svg)",
+        "n": "range(1..6)",
+        "input_references": "range(0..1)"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "recraft",
+          "params": [
+            "style",
+            "controls",
+            "text_layout"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "recraft/recraft-v4.1-vector",
+      "name": "Recraft: Recraft V4.1 Vector",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Recraft"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|16:9|9:16|auto)",
+        "output_format": "enum(svg)",
+        "n": "range(1..6)",
+        "input_references": "range(0..1)"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "recraft",
+          "params": [
+            "style",
+            "controls",
+            "text_layout"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "recraft/recraft-v4.1-utility-pro",
+      "name": "Recraft: Recraft V4.1 Utility Pro",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Recraft"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|16:9|9:16|auto)",
+        "n": "range(1..6)",
+        "input_references": "range(0..1)"
+      },
+      "paramCount": 3,
+      "references": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "recraft",
+          "params": [
+            "style",
+            "controls",
+            "text_layout"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "recraft/recraft-v4.1-utility",
+      "name": "Recraft: Recraft V4.1 Utility",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Recraft"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|16:9|9:16|auto)",
+        "n": "range(1..6)",
+        "input_references": "range(0..1)"
+      },
+      "paramCount": 3,
+      "references": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "recraft",
+          "params": [
+            "style",
+            "controls",
+            "text_layout"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "recraft/recraft-v4.1-pro",
+      "name": "Recraft: Recraft V4.1 Pro",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Recraft"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|16:9|9:16|auto)",
+        "n": "range(1..6)",
+        "input_references": "range(0..1)"
+      },
+      "paramCount": 3,
+      "references": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "recraft",
+          "params": [
+            "style",
+            "controls",
+            "text_layout"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "recraft/recraft-v4.1",
+      "name": "Recraft: Recraft V4.1",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Recraft"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|16:9|9:16|auto)",
+        "n": "range(1..6)",
+        "input_references": "range(0..1)"
+      },
+      "paramCount": 3,
+      "references": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "recraft",
+          "params": [
+            "style",
+            "controls",
+            "text_layout"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "recraft/recraft-v4-pro-vector",
+      "name": "Recraft: Recraft V4 Pro Vector",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Recraft"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|16:9|9:16|auto)",
+        "output_format": "enum(svg)",
+        "n": "range(1..6)",
+        "input_references": "range(0..1)"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "recraft",
+          "params": [
+            "style",
+            "controls",
+            "text_layout"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "recraft/recraft-v4-vector",
+      "name": "Recraft: Recraft V4 Vector",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Recraft"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|16:9|9:16|auto)",
+        "output_format": "enum(svg)",
+        "n": "range(1..6)",
+        "input_references": "range(0..1)"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "recraft",
+          "params": [
+            "style",
+            "controls",
+            "text_layout"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "recraft/recraft-v4-pro",
+      "name": "Recraft: Recraft V4 Pro",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Recraft"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|16:9|9:16|auto)",
+        "n": "range(1..6)",
+        "input_references": "range(0..1)"
+      },
+      "paramCount": 3,
+      "references": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "recraft",
+          "params": [
+            "style",
+            "controls",
+            "text_layout"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "recraft/recraft-v4",
+      "name": "Recraft: Recraft V4",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Recraft"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|16:9|9:16|auto)",
+        "n": "range(1..6)",
+        "input_references": "range(0..1)"
+      },
+      "paramCount": 3,
+      "references": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "recraft",
+          "params": [
+            "style",
+            "controls",
+            "text_layout"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "recraft/recraft-v3",
+      "name": "Recraft: Recraft V3",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Recraft"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|16:9|9:16|auto)",
+        "n": "range(1..6)",
+        "input_references": "range(0..1)"
+      },
+      "paramCount": 3,
+      "references": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 1
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "recraft",
+          "params": [
+            "style",
+            "controls",
+            "text_layout"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "openai/gpt-5.4-image-2",
+      "name": "OpenAI: GPT-5.4 Image 2",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "OpenAI"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|3:2|2:3|4:3|3:4|16:9|9:16|21:9|auto)",
+        "quality": "enum(auto|low|medium|high)",
+        "background": "enum(auto|opaque)",
+        "n": "range(1..10)",
+        "input_references": "range(0..16)",
+        "output_compression": "range(0..100)"
+      },
+      "paramCount": 6,
+      "references": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesRequired": false,
+      "supportsStreaming": true,
+      "providerOptions": [
+        {
+          "slug": "openai",
+          "params": [
+            "moderation"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "google/gemini-3.1-flash-image-preview",
+      "name": "Google: Nano Banana 2 (Gemini 3.1 Flash Image Preview)",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Google AI Studio"
+      ],
+      "params": {
+        "resolution": "enum(512|1K|2K|4K)",
+        "aspect_ratio": "enum(1:1|1:4|1:8|2:3|3:2|3:4|4:1|4:3|4:5|5:4|8:1|9:16|16:9|21:9)",
+        "n": "range(1..1)",
+        "input_references": "range(0..14)"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "google-ai-studio",
+          "params": [
+            "cachedContent"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "sourceful/riverflow-v2-pro",
+      "name": "Sourceful: Riverflow V2 Pro",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Sourceful"
+      ],
+      "params": {
+        "resolution": "enum(1K|2K|4K)",
+        "aspect_ratio": "enum(1:1|4:3|3:4|3:2|2:3|16:9|9:16|21:9|auto)",
+        "n": "range(1..1)",
+        "input_references": "range(0..10)"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 10
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 10
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "sourceful",
+          "params": [
+            "font_inputs"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "sourceful/riverflow-v2-fast",
+      "name": "Sourceful: Riverflow V2 Fast",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Sourceful"
+      ],
+      "params": {
+        "resolution": "enum(1K|2K|4K)",
+        "aspect_ratio": "enum(1:1|4:3|3:4|3:2|2:3|16:9|9:16|21:9|auto)",
+        "n": "range(1..1)",
+        "input_references": "range(0..4)"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 4
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 4
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "sourceful",
+          "params": [
+            "font_inputs"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "black-forest-labs/flux.2-klein-4b",
+      "name": "Black Forest Labs: FLUX.2 Klein 4B",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Black Forest Labs"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|3:2|2:3|16:9|9:16|21:9|auto)",
+        "output_format": "enum(png|jpeg)",
+        "n": "range(1..1)",
+        "input_references": "range(0..4)",
+        "seed": "boolean"
+      },
+      "paramCount": 5,
+      "references": {
+        "min": 0,
+        "max": 4
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 4
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "black-forest-labs",
+          "params": [
+            "steps",
+            "guidance",
+            "safety_tolerance"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "bytedance-seed/seedream-4.5",
+      "name": "ByteDance Seed: Seedream 4.5",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Seed"
+      ],
+      "params": {
+        "resolution": "enum(1K|2K|4K)",
+        "aspect_ratio": "enum(1:1|1:2|2:1|2:3|3:2|3:4|4:3|4:5|5:4|9:16|16:9|9:19.5|19.5:9|9:20|20:9|9:21|21:9|auto)",
+        "n": "range(1..10)",
+        "input_references": "range(0..14)",
+        "seed": "boolean"
+      },
+      "paramCount": 5,
+      "references": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [],
+      "error": ""
+    },
+    {
+      "id": "black-forest-labs/flux.2-max",
+      "name": "Black Forest Labs: FLUX.2 Max",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Black Forest Labs"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|3:2|2:3|16:9|9:16|21:9|auto)",
+        "output_format": "enum(png|jpeg)",
+        "n": "range(1..1)",
+        "input_references": "range(0..8)",
+        "seed": "boolean"
+      },
+      "paramCount": 5,
+      "references": {
+        "min": 0,
+        "max": 8
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 8
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "black-forest-labs/us-3",
+          "params": [
+            "steps",
+            "guidance",
+            "safety_tolerance"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "black-forest-labs/flux.2-flex",
+      "name": "Black Forest Labs: FLUX.2 Flex",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Black Forest Labs"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|3:2|2:3|16:9|9:16|21:9|auto)",
+        "output_format": "enum(png|jpeg)",
+        "n": "range(1..1)",
+        "input_references": "range(0..8)",
+        "seed": "boolean"
+      },
+      "paramCount": 5,
+      "references": {
+        "min": 0,
+        "max": 8
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 8
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "black-forest-labs/us-3",
+          "params": [
+            "steps",
+            "guidance",
+            "safety_tolerance"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "black-forest-labs/flux.2-pro",
+      "name": "Black Forest Labs: FLUX.2 Pro",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Black Forest Labs"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|4:3|3:4|3:2|2:3|16:9|9:16|21:9|auto)",
+        "output_format": "enum(png|jpeg)",
+        "n": "range(1..1)",
+        "input_references": "range(0..8)",
+        "seed": "boolean"
+      },
+      "paramCount": 5,
+      "references": {
+        "min": 0,
+        "max": 8
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 8
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "black-forest-labs",
+          "params": [
+            "steps",
+            "guidance",
+            "safety_tolerance"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "google/gemini-3-pro-image-preview",
+      "name": "Google: Nano Banana Pro (Gemini 3 Pro Image Preview)",
+      "available": true,
+      "endpointCount": 2,
+      "providers": [
+        "Google AI Studio",
+        "Google AI Studio"
+      ],
+      "params": {
+        "resolution": "enum(1K|2K|4K)",
+        "aspect_ratio": "enum(1:1|2:3|3:2|3:4|4:3|4:5|5:4|9:16|16:9|21:9)",
+        "n": "range(1..1)",
+        "input_references": "range(0..14)"
+      },
+      "paramCount": 4,
+      "references": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 14
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "google-ai-studio/global/flex",
+          "params": [
+            "cachedContent"
+          ]
+        },
+        {
+          "slug": "google-ai-studio/global",
+          "params": [
+            "cachedContent"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "openai/gpt-5-image-mini",
+      "name": "OpenAI: GPT-5 Image Mini",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "OpenAI"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|3:2|2:3|auto)",
+        "quality": "enum(auto|low|medium|high)",
+        "background": "enum(auto|transparent|opaque)",
+        "n": "range(1..10)",
+        "input_references": "range(0..16)",
+        "output_compression": "range(0..100)"
+      },
+      "paramCount": 6,
+      "references": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesRequired": false,
+      "supportsStreaming": true,
+      "providerOptions": [
+        {
+          "slug": "openai",
+          "params": [
+            "moderation"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "openai/gpt-5-image",
+      "name": "OpenAI: GPT-5 Image",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "OpenAI"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|3:2|2:3|auto)",
+        "quality": "enum(auto|low|medium|high)",
+        "background": "enum(auto|transparent|opaque)",
+        "n": "range(1..10)",
+        "input_references": "range(0..16)",
+        "output_compression": "range(0..100)"
+      },
+      "paramCount": 6,
+      "references": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 16
+      },
+      "referencesRequired": false,
+      "supportsStreaming": true,
+      "providerOptions": [
+        {
+          "slug": "openai",
+          "params": [
+            "moderation"
+          ]
+        }
+      ],
+      "error": ""
+    },
+    {
+      "id": "google/gemini-2.5-flash-image",
+      "name": "Google: Nano Banana (Gemini 2.5 Flash Image)",
+      "available": true,
+      "endpointCount": 1,
+      "providers": [
+        "Google Vertex"
+      ],
+      "params": {
+        "aspect_ratio": "enum(1:1|2:3|3:2|3:4|4:3|4:5|5:4|9:16|16:9|21:9)",
+        "n": "range(1..1)",
+        "input_references": "range(0..3)"
+      },
+      "paramCount": 3,
+      "references": {
+        "min": 0,
+        "max": 3
+      },
+      "referencesEffective": {
+        "min": 0,
+        "max": 3
+      },
+      "referencesRequired": false,
+      "supportsStreaming": false,
+      "providerOptions": [
+        {
+          "slug": "google-vertex/global",
+          "params": [
+            "cachedContent"
+          ]
+        }
+      ],
+      "error": ""
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+# dsh-imagegen-panel bundle patch —— 把本插件作为一行插进 web profile 的 roster。
+#
+# 行 id（`imagegen`）是承重的：
+#
+#   1. 它是 `sidebar.panellist` 的 **id**（侧栏那一行的 cell key），
+#      也是 `main` 槽位的 **key**（主区那个面板的 cell key）。
+#      侧栏的 catalog 明确写着：「Each list id addresses the matching main panel
+#      —— the sidebar owns the button and resolves its label from list metadata.」
+#      已验证：现有「插件」行（@deepseek-ai/dsh-client-ui-plugin-manager）正是用
+#      同一个 PANEL_ID 同时注册 `sidebar.panellist`(id) 与 `main`(key)。
+#
+#   2. 插入行的 Loader entry id 是 `include:<rowId>`，所以本行为
+#      **`include:imagegen`**。宿主半边若要按 entry id 找自己，用这个。
+#
+# 顺序：`sidebar.panellist` 的 order 在客户端注册时给 -1（排在「插件」order=0 之前）。
+# patch 这里的顺序只决定加载先后，不决定侧栏排列。
+- insert:
+    - id: imagegen
+      name: dsh-imagegen-panel

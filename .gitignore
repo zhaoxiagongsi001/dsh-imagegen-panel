@@ -1,0 +1,33 @@
+# Installed dependencies
+node_modules/
+
+# lib/ is deliberately NOT ignored. `main` and `exports` point at lib/index.js
+# and lib/client.js, and a git-source install materialises exactly the tracked
+# files: ignoring the build output means a user who installs with
+# `dsh plugin add github:<owner>/dsh-imagegen-panel` gets a package whose
+# declared entry artifact is missing, and dshmarket reports it as
+# "the declared entry artifact is missing (source-only checkout or blocked
+# build) — the next boot would fail".
+#
+# The build is reproducible from src/ (`npm run build`), so committing the
+# output costs nothing and is what makes the GitHub install path work. Re-run
+# the build before every commit that touches src/.
+
+# Local scratch space, never part of the deliverable
+.ref/
+.npm-cache/
+.tmp-pack/
+
+# Development-time material: internal notes and process evidence. These carry
+# this machine's absolute paths and the author's private setup, so they stay out
+# of the published tree.
+PLAN.md
+HANDOVER-*.md
+ui-mockup/
+preview/
+stage[0-9]-evidence/
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+*.log

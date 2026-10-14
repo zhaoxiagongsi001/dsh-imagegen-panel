@@ -1,0 +1,87 @@
+{
+  "name": "dsh-imagegen-panel",
+  "version": "0.1.0",
+  "description": "Image generation panel for the DSH web GUI: a sidebar entry opens a full panel — prompt / reference images → generate → in-panel preview, save and history. The API key never leaves the host.",
+  "type": "module",
+  "main": "lib/index.js",
+  "icon": "assets/icon.svg",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "src",
+    "assets",
+    "locale",
+    "cordis.patch.yml",
+    "screenshots.json",
+    "LICENSE",
+    "README.md"
+  ],
+  "dsh": {
+    "manifestVersion": 1,
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-sidebar"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.0",
+    "@types/react": "~18.3.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "~5.7.2"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs && node scripts/host-check.mjs && node scripts/render-check.mjs",
+    "upstream": "node scripts/upstream-check.mjs",
+    "live": "node scripts/live-check.mjs",
+    "preview": "node scripts/build.mjs && node scripts/preview.mjs"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "image-generation",
+    "imagegen",
+    "openrouter",
+    "cordis"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhaoxiagongsi001/dsh-imagegen-panel.git"
+  },
+  "author": "zhaoxiagongsi001",
+  "homepage": "https://github.com/zhaoxiagongsi001/dsh-imagegen-panel#readme",
+  "bugs": {
+    "url": "https://github.com/zhaoxiagongsi001/dsh-imagegen-panel/issues"
+  }
+}
