@@ -646,7 +646,7 @@ checkEqual(hostFields, clientFields, '宿主下发的配置字段与客户端 Pa
 
 console.log('\n--- 4. 写配置（PUT） ---')
 
-// 假 Key 拆成两段拼接：仓库里不出现形似真实密钥的完整字面量（GitHub 密钥扫描会对该前缀误报）。
+// 假 Key 拆成两段拼接：仓库里不再以完整字面量出现形似密钥的串，降低被自动化密钥扫描标记的概率（运行时仍是同一字符串，测试语义不变）。
 const PLAIN_KEY = 'sk-or-v1-' + '0123456789abcdef' + '0123456789abcdef'
 const putRes = await call(first.routes, API.config, {
   method: 'PUT',
