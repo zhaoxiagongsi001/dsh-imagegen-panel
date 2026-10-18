@@ -155,7 +155,7 @@ const image = {
   aspectRatio: '16:9',
   resolution: '1K',
   createdAt: Date.UTC(2026, 9, 9, 13, 14),
-  savedPath: 'D:\\DSH\\.dsh-imagegen\\out\\2026-10-09_2114_gemini-3-pro-image.png',
+  savedPath: 'C:\\Users\\you\\.dsh-imagegen\\out\\2026-10-09_2114_gemini-3-pro-image.png',
 }
 
 const history = ['a', 'b', 'c', 'd', 'e', 'f', 'b', 'c'].map((art, index) => ({
@@ -264,6 +264,8 @@ const composerBase = {
   onGenerate: noop,
   onCancel: noop,
   onOpenModelPicker: noop,
+  // 「连接配置」按钮 2026-10-18 从页头挪进左栏底部模型行，与模型 chip 同排。
+  onOpenConfig: noop,
   lastSeconds: 94,
 }
 
@@ -273,7 +275,7 @@ const config = {
   hasKey: true,
   keyHint: 'sk-or-v1-••••••••4f2a',
   model: model.id,
-  autoSaveDir: 'D:\\DSH\\.dsh-imagegen\\out\\',
+  autoSaveDir: 'C:\\Users\\you\\.dsh-imagegen\\out\\',
   extraJson: '{\n  "background": "opaque",\n  "output_compression": 90,\n  "provider": { "sort": "price" }\n}',
   timeoutSec: 180,
   outputFormat: 'png',
@@ -285,25 +287,30 @@ const config = {
  * 真实插件面板的「已配置」版式。
  *
  * `ImageGenPanel` 的配置状态来自它自己的模块作用域，外部注入不了，所以这里
- * 用它自己的两个子组件拼出同样的 `.panel / .head / .body2` 结构 ——
+ * 用它自己的两个子组件拼出同样的 `.panel / .body2 / .leftCol / .head` 结构 ——
  * 类名与布局都取自同一次构建，视觉等价。
+ *
+ * 2026-10-18 起版式有一条要点：页头**在左栏里**（`.leftCol` 的第一个孩子），
+ * 所以右栏 `.result` 与它同起、预览区从面板最顶部开始。原来页头横跨整宽、
+ * 右上角还钉着模型 chip 与「连接配置」，那一行高度是从预览区身上扣的。
  */
-function configuredPanel(stageProps, composerPatch = {}, modelLabel = model.id) {
+function configuredPanel(stageProps, composerPatch = {}) {
   const composer = render(h(api.Composer, { ...composerBase, ...composerPatch }))
   const stage = render(h(api.ResultStage, { ...stageBase, ...stageProps }))
   return `
     <div class="panel_panel">
-      <header class="panel_head">
-        <div class="panel_headText">
-          <div class="panel_title">生图</div>
-          <div class="panel_sub">提示词 / 参考图 → 生成 → 面板内预览 · 保存 · 历史</div>
+      <div class="panel_body2">
+        <div class="panel_leftCol">
+          <header class="panel_head">
+            <div class="panel_headText">
+              <div class="panel_title">生图</div>
+              <div class="panel_sub">提示词 / 参考图 → 生成 → 面板内预览 · 保存 · 历史</div>
+            </div>
+          </header>
+          ${composer}
         </div>
-        <div class="panel_headActions">
-          <button class="panel_chip" type="button">模型 <b>${modelLabel}</b></button>
-          <button class="panel_btn" type="button">连接配置</button>
-        </div>
-      </header>
-      <div class="panel_body2">${composer}${stage}</div>
+        ${stage}
+      </div>
     </div>`
 }
 
@@ -353,8 +360,11 @@ const STATES = [
     id: 'done',
     title: '② 已出图（主交付版式）',
     note:
-      '结果条三行：①「已自动保存到 …」+ 时间·比例·分辨率·耗时；②**这张图当时用的模型与参数**'
-      + '（老板截图里红线标出的位置）；③四个操作按钮。右上角是 OpenRouter 返回的 usage.cost。'
+      '版式（2026-10-18 改动）：**页头在左栏顶部**，右栏预览区从面板最顶部一路到底 —— '
+      + '以前页头横跨整宽、右上角还钉着模型 chip 与「连接配置」，那一行高度是从预览区身上扣的。'
+      + '结果条三行：①「已自动保存到 …」+ 时间·比例·分辨率·耗时；②**这张图当时用的模型与参数**'
+      + '（老板截图里红线标出的位置）；③五个操作按钮（含「打开」）。右上角是 OpenRouter 返回的 usage.cost，'
+      + '左下角是量出来的真实尺寸。双击大图 = 用系统默认程序打开原图，结果条那颗「打开」是同一件事。'
       + '参数显示的是**实际发给上游**的值（质量 high、背景 opaque），而不是面板上的值 —— 配置里那段「额外参数」覆盖过面板，显示面板值等于骗人。',
     html: configuredPanel(
       { run: { kind: 'done', image: imageFacts }, preview: imageFacts, history: [imageFacts, ...history], currentModel: model.id },
@@ -380,7 +390,6 @@ const STATES = [
     html: configuredPanel(
       { run: { kind: 'idle' }, preview: imageFacts, history: [imageFacts, ...history], currentModel: model.id },
       { prompt: imageFacts.prompt, params: { aspectRatio: '16:9', resolution: '1K', count: '1', quality: 'medium' }, extra: { background: 'auto', output_compression: '80' } },
-      model.id,
     ),
   },
   {
@@ -393,8 +402,54 @@ const STATES = [
     html: configuredPanel(
       { run: { kind: 'idle' }, preview: imageOtherModel, history: [imageOtherModel, ...history], currentModel: model.id },
       { prompt: imageOtherModel.prompt, params: { aspectRatio: '1:1', resolution: '2K', count: '1', quality: 'medium' }, extra: {} },
-      model.id,
     ),
+  },
+  {
+    id: 'notice-err',
+    title: '②f 失败提示落在「历史记录 · 最近 N 张」右边（本次改动）',
+    note:
+      '这条红色提示原来浮在面板**底部**（盖在大图上、6 秒后自己消失）。现在它挂在历史行里：'
+      + '12px 一行小字、失败档用错误红、单行超出省略（全文在 title 里）。位置固定、不遮图，'
+      + '同一行的「清空」仍然贴右。用来说明「点历史图回填参数」时那 1 项对不上的取值。',
+    html: configuredPanel({
+      run: { kind: 'idle' },
+      preview: imageOtherModel,
+      history: [imageOtherModel, ...history],
+      currentModel: model.id,
+      notice: { text: '已载入该图的提示词与参数；1 项与当前模型不符、没有写入：分辨率', kind: 'err' },
+    }),
+  },
+  {
+    id: 'notice-ok',
+    title: '②g 成功提示（同位置 · 次级灰）',
+    note: '保存 / 复制 / 打开 / 优化这类成功消息走同一个位置，用次级灰而不是红色 —— 不再有整块底色的浮条（位置固定在历史行里，停留时间照旧：成功 1.8s、失败 6s）。这里故意放一条**很长的**保存路径，验证它单行省略、不把这行撑高。',
+    html: configuredPanel({
+      run: { kind: 'idle' },
+      preview: imageFacts,
+      history: [imageFacts, ...history],
+      currentModel: model.id,
+      notice: { text: '已保存到 C:\\Users\\you\\.dsh-imagegen\\out\\2026-10-18_091924_gpt-image-2.5-flare.png' },
+    }),
+  },
+  {
+    id: 'notice-long',
+    title: '②h 超长提示（本次复验加的压力用例）',
+    note:
+      '复验发现的问题就在这里：提示一长，「历史记录 / 最近 N 张」两个标签原来会被挤成两行，'
+      + '整行从 22px 变 44px —— 而舞台是弹性项，多出来的高度直接从预览区扣回去，把改动①'
+      + '刚还给预览区的空间又吃掉一块。修法是 `.historyHead { white-space: nowrap }` + 提示自己 '
+      + '`flex: 0 1 auto; min-width: 0`：负余量只能由提示吸收，于是**行高恒定 22px、只有提示被省略**、'
+      + '「清空」照旧贴右。这条 180 字符的路径就是用来盯住这一点的。',
+    html: configuredPanel({
+      run: { kind: 'idle' },
+      preview: imageFacts,
+      history: [imageFacts, ...history],
+      currentModel: model.id,
+      notice: {
+        text: '已保存到 C:\\Users\\you\\.dsh-imagegen\\out\\2026-10-18_091924_openai-gpt-image-2.5-flare-batch-03-of-04-'
+          + 'retry-after-upstream-timeout-with-provider-sort-price.png',
+      },
+    }),
   },
   {
     id: 'history-legacy',

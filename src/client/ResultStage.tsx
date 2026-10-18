@@ -14,7 +14,7 @@
  */
 import { useState } from 'react'
 import { Art } from './art.tsx'
-import { CheckIcon, ClockIcon, CoinIcon, CopyIcon, EmptyGlyphIcon, ErrorGlyphIcon, OpenIcon, RetryIcon, SaveIcon } from './icons.tsx'
+import { CheckIcon, ClockIcon, CoinIcon, CopyIcon, EmptyGlyphIcon, ErrorGlyphIcon, OpenIcon, RetryIcon, SaveIcon, WarnIcon } from './icons.tsx'
 import { factListOf, factTextOf, type FieldFact } from './labels.ts'
 import type { GeneratedImage, RunState } from './types.ts'
 import css from './panel.module.css'
@@ -56,12 +56,24 @@ function ImageOrArt(props: { image: GeneratedImage; variant: 'stage' | 'thumb' }
 }
 
 /** 已出图的舞台内容。 */
-function ArtStage(props: { image: GeneratedImage }): React.JSX.Element {
+function ArtStage(props: { image: GeneratedImage; onOpen: () => void }): React.JSX.Element {
   const { image } = props
   // 保持图片原始宽高比，并限制在舞台内 —— 用 aspect-ratio 而不是写死高度。
   const ratio = image.aspectRatio === 'auto' ? '1 / 1' : image.aspectRatio.replace(':', ' / ')
   return (
-    <div className={css.artFrame} style={{ width: 'min(100%, 720px)', aspectRatio: ratio }}>
+    <div
+      className={css.artFrame}
+      style={{ width: 'min(100%, 720px)', aspectRatio: ratio }}
+      /*
+       * 双击大图 = 用系统默认程序打开这张图的**本地原图**（老板 2026-10-18 需求）。
+       *
+       * 走的是结果条那颗「打开」按钮**同一个** `onOpen` —— 不另开一条路，
+       * 免得两处行为分叉（比如哪天加了「只能打开已保存的图」的判定）。
+       * `title` 必须写：双击是个隐藏手势，不说没人会去试。
+       */
+      onDoubleClick={props.onOpen}
+      title="双击用系统默认程序打开原图"
+    >
       <ImageOrArt image={image} variant="stage" />
       <span className={css.costBadge}>
         <CoinIcon />
@@ -101,6 +113,17 @@ export interface ResultStageProps {
   onClearHistory: () => void
   /** 设置区当前选中的模型 —— 结果行用它标出「这张不是它生成的」。 */
   currentModel?: string
+  /**
+   * 一句行内提示（成功 / 警告 / 失败）。
+   *
+   * 它以前是浮在面板底部的一块 `.toast`：盖在大图上。2026-10-18 老板要求搬到
+   * 「历史记录 · 最近 N 张」右边，做成一行小字。
+   *
+   * 说清楚**没变**的那部分：消息仍然会自己消失（成功 1.8s、失败 6s，见
+   * `ImageGenPanel.tsx` 里那个定时器）—— 这次改的是**位置**（固定、不遮图、
+   * 失败是红色），不是停留时间。
+   */
+  notice?: { text: string; kind?: 'ok' | 'err' }
   /** 右键历史图（菜单由上层渲染）。 */
   onHistoryContextMenu?: (image: GeneratedImage, position: { x: number; y: number }) => void
 }
@@ -182,7 +205,7 @@ export function ResultStage(props: ResultStageProps): React.JSX.Element {
                 </div>
               </div>
             )
-            : <div className={css.stageInner}><ArtStage image={preview} /></div>
+            : <div className={css.stageInner}><ArtStage image={preview} onOpen={props.onOpen} /></div>
         )}
       </div>
 
@@ -224,6 +247,7 @@ export function ResultStage(props: ResultStageProps): React.JSX.Element {
         selectedId={preview?.id}
         onSelect={props.onSelectHistory}
         onClear={props.onClearHistory}
+        {...props.notice === undefined ? {} : { notice: props.notice }}
         {...props.onHistoryContextMenu === undefined ? {} : { onContextMenu: props.onHistoryContextMenu }}
       />
     </section>
@@ -338,6 +362,14 @@ export interface HistoryStripProps {
   onSelect: (image: GeneratedImage) => void
   onClear: () => void
   /**
+   * 一句行内提示，显示在「历史记录 · 最近 N 张」右边。
+   *
+   * 2026-10-18 老板要求：底部那块浮层提示条搬到这行来，字体与颜色按「成功 / 失败」
+   * 分档（成功 = 次级灰，失败 = 错误红）。长消息单行省略、全文进 `title`；
+   * 消失时机没改（成功 1.8s / 失败 6s），改的是位置。
+   */
+  notice?: { text: string; kind?: 'ok' | 'err' }
+  /**
    * 右键某张历史图（鼠标位置是**视口坐标**）。
    *
    * 菜单本身由上层渲染：它才知道「还能不能再加参考图」「保存到哪儿」这些状态，
@@ -354,6 +386,20 @@ export function HistoryStrip(props: HistoryStripProps): React.JSX.Element {
         <ClockIcon />
         历史记录
         <span>最近 {props.items.length} 张</span>
+        {/*
+          行内提示（原来是浮在面板底部的 `.toast`）。
+          `role="status"` 让读屏软件也能播报；`title` 兜住单行省略掉的长消息。
+        */}
+        {props.notice !== undefined && (
+          <span
+            className={props.notice.kind === 'err' ? `${css.notice} ${css.noticeErr}` : css.notice}
+            title={props.notice.text}
+            role="status"
+          >
+            {props.notice.kind === 'err' && <WarnIcon size={12} />}
+            <span className={css.noticeText}>{props.notice.text}</span>
+          </span>
+        )}
         <button className={css.clear} type="button" onClick={props.onClear}>清空</button>
       </div>
       <div className={css.historyStrip}>

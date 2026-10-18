@@ -43,13 +43,20 @@
 
 /* ---------------------------------------------------------------- 页头 */
 
+/*
+ * 页头：2026-10-18 起**只占左栏宽度**。
+ *
+ * 老板的原话是「模型信息和配置按钮改地方，释放右边预览图片的空间」——
+ * 原来 `.head` 是横跨整宽的一行、右侧还钉着「模型」chip 与「连接配置」按钮，
+ * 这一行的高度是从**预览区**身上扣的。现在页头跟着左栏走（见 `.leftCol`），
+ * 右栏 `.result` 从面板最顶部一路到底，预览区直接多出这一行的高度。
+ *
+ * 右侧动作区（`.headActions`）随之删除：「模型」chip 左栏底部本来就有一个、
+ * 且那个还带下拉箭头；「连接配置」挪到左栏底部模型行旁边。
+ */
 .head {
   flex: none;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 24px 14px;
-  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  padding: 16px 20px 0 24px;
 }
 
 .headText { min-width: 0; }
@@ -66,12 +73,7 @@
   margin-top: 1px;
 }
 
-.headActions {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+
 
 /* ---------------------------------------------------------------- 控件 */
 
@@ -190,6 +192,20 @@
   min-height: 0;
 }
 
+/*
+ * 左栏：页头 + 输入区（`Composer` 自己滚，页头钉在上面不跟着滚）。
+ *
+ * 它是 `.body2` 的第一个 grid 项；右栏（`.result`）是第二个 —— 两栏同高同起，
+ * 所以「右栏从最顶部开始」这件事是结构给的，不靠负 margin 之类的技巧。
+ */
+.leftCol {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  border-right: 1px solid var(--dsw-alias-border-l1);
+}
+
 /* ------------------------------------------------------------ 左：输入区 */
 
 .composer {
@@ -197,7 +213,7 @@
   flex-direction: column;
   gap: 14px;
   padding: 16px 20px 16px 24px;
-  border-right: 1px solid var(--dsw-alias-border-l1);
+  min-width: 0;
   overflow: auto;
 }
 
@@ -461,6 +477,33 @@
 .genRow { display: flex; gap: 8px; }
 .genRow .btnPrimary { flex: 1; }
 
+/*
+ * 模型行：切换模型的 chip 与「连接配置」按钮并排。
+ *
+ * 「连接配置」原来在整宽页头右上角（老板要求挪走，把那一行高度让给预览区）。
+ * 挪到这里有个额外好处：模型与「改模型的地方」在同一行，不用跨半屏去点。
+ * chip 可缩、id 省略；按钮不许被挤掉。
+ */
+.modelRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.modelRow .chip {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.modelRow .chip b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modelRow .btn { flex: none; }
+
 .genMeta {
   display: flex;
   align-items: center;
@@ -536,6 +579,9 @@
   overflow: hidden;
   box-shadow: 0 8px 28px var(--dsw-alias-bg-mask-2);
   background: var(--dsw-alias-bg-multi-select);
+  /* 双击 = 用系统默认程序打开原图（老板 2026-10-18 需求）。
+     指针形状给个「这里可以点」的信号，具体动作在 title 里说清。 */
+  cursor: pointer;
 }
 
 /*
@@ -773,6 +819,17 @@
   min-width: 0;
 }
 
+/*
+ * 历史行：图标 +「历史记录」+「最近 N 张」+ 行内提示 +「清空」。
+ *
+ * `white-space: nowrap` 是**必须的**（2026-10-18 复验发现的问题）：这一行里只有
+ * `.notice` 能缩（它有 `min-width: 0` + 自己那层省略号），但默认所有子项 `flex-shrink: 1`
+ * 都会分摊负余量 —— 一旦提示很长（实测 439px 文本 / 450px 容器，「已经保存到 C:\…png」
+ * 这种就够），「历史记录」「最近 N 张」这两个只比内容宽 0-1px 的标签就会被挤成两行，
+ * 整行从 22px 变 44px，而舞台是弹性项 —— 换行多出来的高度直接从预览区扣回去，
+ * 把改动①刚还给预览区的空间又吃掉一部分。nowrap 之后标签的 min-content = 整串文本，
+ * 缩不动，负余量只能由提示吸收（也就是我们想要的那一个被省略）。
+ */
 .historyHead {
   display: flex;
   align-items: center;
@@ -780,10 +837,15 @@
   margin-bottom: 8px;
   font-size: 12px;
   color: var(--dsw-alias-label-tertiary);
+  white-space: nowrap;
 }
+
+/* 图标也不许被压缩（图标没有文字可省略，压小了只会变形）。 */
+.historyHead > svg { flex: none; }
 
 .historyHead .clear {
   margin-left: auto;
+  flex: none;
   color: var(--dsw-alias-label-tertiary);
   cursor: pointer;
   background: none;
@@ -793,6 +855,41 @@
 }
 
 .historyHead .clear:hover { color: var(--dsw-alias-label-secondary); }
+
+/*
+ * 行内提示（2026-10-18）。
+ *
+ * 它以前是浮在面板底部的一块 `.toast`（成功灰底、失败红底），老板要求搬到
+ * 「历史记录 · 最近 N 张」右边、做成一档可读的小字。两条纪律：
+ *  1. 字号固定 12px、单行省略、全文进 `title` —— 消息长度差得远（「已保存到
+ *     C:\…\out\…png」比「已取消」长十几倍），不许因此把这行撑高或撑宽。
+ *     长消息会把**这一行**挤爆，所以 `.historyHead` 是 `white-space: nowrap`，
+ *     负余量全部由这里（`min-width: 0` + 省略号）吸收，行高恒为 22px。
+ *  2. 成功 = 次级灰、警告/失败 = 错误红；不再用整块底色抢注意力。
+ *     停留时间与搬之前一样（成功 1.8s / 失败 6s），改的只是位置。
+ */
+.historyHead .notice {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  /* 只按内容占位、需要时才缩（不是 `flex: 1 1 auto` —— 那会白占掉整行，
+     把「清空」推到最右边之外的多余空间里，长提示反而更早被省略）。 */
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.historyHead .notice svg { flex: none; }
+
+.historyHead .noticeText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.historyHead .noticeErr { color: var(--dsw-alias-state-error-primary); }
 
 /* ------------------------------------------------------- 历史图右键菜单 */
 
@@ -1140,42 +1237,8 @@
   color: var(--dsw-alias-label-tertiary);
 }
 
-/* 轻提示 */
-.toast {
-  position: absolute;
-  left: 50%;
-  bottom: 28px;
-  transform: translateX(-50%);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  /* 高度不再写死 34px：提示里会出现文件名之类的长文本，写死高度 + 面板
-     `overflow:hidden` 会把尾巴裁掉（「已用系统默认程序打开 <文件>」就会）。
-     改成「最小高度 + 可换行」，短提示看起来仍是原来那 34px。 */
-  max-width: min(680px, calc(100% - 48px));
-  height: auto;
-  min-height: 34px;
-  padding: 8px 14px;
-  line-height: 18px;
-  text-align: left;
-  border-radius: var(--dsw-radius-md);
-  background: var(--dsw-alias-toast-bg);
-  color: var(--dsw-alias-toast-label);
-  font-size: 13px;
-  z-index: 60;
-}
-
-/* 失败提示：同一块底板换成错误色（前景取 label-primary-foreground，深浅两套都对得上）。 */
-.toastErr {
-  background: var(--dsw-alias-state-error-primary);
-  color: var(--dsw-alias-label-primary-foreground);
-  max-width: min(680px, calc(100% - 48px));
-  height: auto;
-  min-height: 34px;
-  padding: 8px 14px;
-  text-align: left;
-  line-height: 18px;
-}
+/* 轻提示：2026-10-18 起不再浮在面板底部 —— 改挂在历史行右侧（见 `.historyHead .notice`）。
+   整套 `.toast` / `.toastErr` 规则随之下线：留着只会是没人引用的悬空样式。 */
 
 /* ---------------------------------------------------------------- 动效偏好 */
 

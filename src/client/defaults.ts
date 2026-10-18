@@ -17,7 +17,9 @@ export const DEFAULT_CONFIG: PanelConfig = {
   hasKey: false,
   keyHint: '',
   model: 'google/gemini-3-pro-image',
-  autoSaveDir: 'D:\\DSH\\.dsh-imagegen\\out\\',
+  // 空 = 首帧先按「不自动另存」渲染，宿主那份真实默认值到达后即覆盖它。
+  // v0.1.0 这里硬编码过作者本机路径，已移除：它既泄漏本机目录结构，在别的机器上也是无效路径。
+  autoSaveDir: '',
   extraJson: '{\n  "background": "opaque",\n  "output_compression": 90,\n  "provider": { "sort": "price" }\n}',
   timeoutSec: 180,
   outputFormat: 'png',

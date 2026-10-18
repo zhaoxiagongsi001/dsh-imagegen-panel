@@ -25,7 +25,11 @@ PLAN.md
 HANDOVER-*.md
 ui-mockup/
 preview/
-stage[0-9]-evidence/
+# Any stage<N>-evidence/ directory (one or more digits): stage2-evidence/,
+# stage11-evidence/ ... The old single-digit class [0-9] silently missed
+# stage11-evidence/ (added 2026-10-18), which holds raw Edge browser-profile
+# data and local absolute paths - never publish it.
+stage*-evidence/
 
 # Editor / OS noise
 .DS_Store

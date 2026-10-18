@@ -207,7 +207,7 @@ checkContains(panel, '张数', '渲染出张数参数')
 checkContains(panel, '质量', '渲染出质量参数')
 checkContains(panel, '历史记录', '渲染出历史条标题')
 checkContains(panel, '还没有图片', '未出图时舞台为空态')
-checkContains(panel, '连接配置', '页头有「连接配置」按钮')
+checkContains(panel, '连接配置', '左栏底部有「连接配置」按钮（2026-10-18 从页头挪来）')
 // 首帧还没拉到模型目录（`model` 为 undefined）→ 走「没有能力表」那条退化的老路。
 checkContains(panel, '官方全局枚举', '没有能力表时如实说明用的是官方全局枚举')
 check(panel.includes('disabled'), '未配置时生成按钮为 disabled')
@@ -630,7 +630,7 @@ const baseImage = {
 /** 配了「自动保存目录」之后：多一份 autoSavedPath，界面优先显示它。 */
 const autoSavedImage = {
   ...baseImage,
-  autoSavedPath: 'D:\\DSH\\.dsh-imagegen\\out\\x.png',
+  autoSavedPath: 'C:\\Users\\you\\.dsh-imagegen\\out\\x.png',
 }
 
 const stageProps = {
@@ -687,7 +687,7 @@ const stageAutoSaved = render(h(clientExports.ResultStage, {
   preview: autoSavedImage,
   history: [autoSavedImage],
 }), 'ResultStage（自动另存到工作区）')
-checkContains(stageAutoSaved, '已自动保存到 D:\\DSH\\.dsh-imagegen\\out\\x.png', '配了自动保存目录时，结果条显示工作区路径')
+checkContains(stageAutoSaved, '已自动保存到 C:\\Users\\you\\.dsh-imagegen\\out\\x.png', '配了自动保存目录时，结果条显示工作区路径')
 checkContains(stageDone, '$0.0391', '花费角标显示 usage.cost')
 checkContains(stageDone, '1536 × 864', '尺寸角标')
 checkContains(stageDone, '保存', '结果条有「保存」按钮（A8）')
@@ -762,6 +762,115 @@ const strip = render(h(clientExports.HistoryStrip, {
   onContextMenu: () => {},
 }), 'HistoryStrip（带右键）')
 checkContains(strip, '右键更多操作', '历史缩略图的 tooltip 提示可以右键')
+
+// ---------------------------------------------------------------------------
+// 2026-10-18 三项改动（老板拍板 A / A / A）
+//
+//   ① 页头并入左栏：右栏预览从面板最顶部开始（多出的就是页头那一行的高度）
+//   ② 底部浮层提示条 → 历史行内「最近 N 张」右边的小字（成功灰 / 失败红）
+//   ③ 舞台大图双击 = 用系统默认程序打开原图
+//
+// 说明：事件绑定在 `renderToStaticMarkup` 的产物里看不见（React 不序列化事件），
+// 所以③除了 title 文案之外，还走「元素树遍历」与「源码级断言」两条路 —— 不是只查字符串。
+// ---------------------------------------------------------------------------
+
+/** 深度遍历 React 元素树（只走 props.children，不触发任何渲染）。 */
+function walkElements(node, visit) {
+  if (node === null || node === undefined || typeof node !== 'object') return
+  if (Array.isArray(node)) {
+    for (const child of node) walkElements(child, visit)
+    return
+  }
+  if (!('props' in node)) return
+  visit(node)
+  walkElements(node.props.children, visit)
+}
+
+// ---- ① 页头并入左栏 ----
+const leftColAt = panel.indexOf('panel_leftCol')
+const headAt = panel.indexOf('panel_head')
+const composerAt = panel.indexOf('panel_composer')
+const resultAt = panel.indexOf('panel_result')
+check(leftColAt >= 0, '左栏容器在（panel_leftCol）')
+check(leftColAt >= 0 && headAt > leftColAt, '页头挪进左栏内（不再横跨整宽）')
+check(headAt >= 0 && composerAt > headAt, '输入区排在页头之后（页头 + 输入区同属左栏）')
+check(composerAt >= 0 && resultAt > composerAt, '右栏结果区是左栏的兄弟、同一行右列')
+check(!panel.includes('panel_headActions'), '页头右侧动作区不再渲染')
+check(!panelSource.includes('headActions'), 'ImageGenPanel 源码里不再引用页头动作区')
+// 「连接配置」从页头搬到左栏底部的模型行（左栏底部本来就有一个模型选择器）。
+const actionsAt = panel.indexOf('panel_actions')
+const configBtnAt = panel.indexOf('连接配置')
+const headEndAt = panel.indexOf('</header>')
+check(actionsAt >= 0 && configBtnAt > actionsAt, '「连接配置」按钮在左栏底部动作区里')
+check(headEndAt >= 0 && configBtnAt > headEndAt, '「连接配置」已经不在页头里')
+check(!panelSource.includes('css.toast'), 'ImageGenPanel 源码里不再渲染底部浮条（css.toast）')
+
+// ---- ② 提示条搬到历史行右侧 ----
+const NOTICE_ERR_TEXT = '已载入该图的提示词与参数；1 项与当前模型不符、没有写入：分辨率'
+const stripNoticeErr = render(h(clientExports.HistoryStrip, {
+  items: [baseImage],
+  selectedId: undefined,
+  onSelect: () => {},
+  onClear: () => {},
+  notice: { text: NOTICE_ERR_TEXT, kind: 'err' },
+}), 'HistoryStrip（失败提示）')
+checkContains(stripNoticeErr, 'panel_noticeErr', '失败提示走高亮错误色（noticeErr）')
+checkContains(stripNoticeErr, '没有写入：分辨率', '提示正文原样渲染（省略只发生在显示层）')
+checkContains(stripNoticeErr, 'role="status"', '提示带 role=status（读屏软件能播报）')
+checkContains(stripNoticeErr, `title="${NOTICE_ERR_TEXT}"`, '长消息全文进 title（单行省略后还能看全）')
+const recentAt = stripNoticeErr.indexOf('最近 1 张')
+const noticeAt = stripNoticeErr.indexOf('panel_noticeErr')
+const clearAt = stripNoticeErr.indexOf('清空')
+check(recentAt >= 0 && noticeAt > recentAt, '提示排在「最近 N 张」右边（老板指定的位置）')
+check(noticeAt >= 0 && clearAt > noticeAt, '「清空」仍在提示右边（贴右不变）')
+
+const stripNoticeOk = render(h(clientExports.HistoryStrip, {
+  items: [baseImage],
+  selectedId: undefined,
+  onSelect: () => {},
+  onClear: () => {},
+  notice: { text: '已保存到 C:\\Users\\you\\x.png' },
+}), 'HistoryStrip（成功提示）')
+check(stripNoticeOk.includes('panel_notice'), '成功提示用同一块行内位置')
+check(!stripNoticeOk.includes('panel_noticeErr'), '成功提示不用错误色（次级灰）')
+check(!strip.includes('panel_notice'), '没有提示时不渲染空节点')
+
+// ---- ③ 舞台大图双击打开 ----
+//
+// 为什么只能做到这个程度：React 不把事件写进 `renderToStaticMarkup` 的 HTML，
+// 而 `ResultStage` 内部有 `useState`（「已复制」那一秒的反馈），直接当纯函数调用
+// 会违反 Hook 规则。所以这里用「源码级 + 同一段 JSX 内共现」两条断言锁定：
+// 必须在 `ArtStage` 的 artFrame 上、必须绑的是 `props.onOpen`、必须全文件只有这一处
+// onDoubleClick（历史缩略图不许有）。真实双击行为由重启后的 live 验收兜底。
+const resultStageSource = readFileSync(path.join(root, 'src', 'client', 'ResultStage.tsx'), 'utf8')
+const artStageBody = /function ArtStage\([\s\S]*?\n\}/u.exec(resultStageSource)?.[0] ?? ''
+check(artStageBody.includes('onDoubleClick={props.onOpen}'), 'artFrame 上绑的是 props.onOpen（源码级：事件不进静态标记）')
+check(artStageBody.includes('title="双击用系统默认程序打开原图"'), '同一段 JSX 里带 title 提示（不至于是个藏着的手势）')
+check(artStageBody.includes('className={css.artFrame}'), '双击热区确实落在 artFrame（大图容器）上')
+const doubleClickBindings = resultStageSource.match(/onDoubleClick=/gu)?.length ?? 0
+check(doubleClickBindings === 1, `全文件只有一处 onDoubleClick（实际 ${doubleClickBindings} 处）`)
+checkContains(stageDone, '双击用系统默认程序打开原图', '大图 title 说清双击手势（不说没人会去试）')
+
+// 历史缩略图：它是个**无 Hook 的纯组件**，可以直接当函数调用来遍历元素树 ——
+// 这样「缩略图上没有双击」是结构级证据，而不是靠源码里数关键字。
+const stripTree = clientExports.HistoryStrip({
+  items: [baseImage],
+  selectedId: undefined,
+  onSelect: () => {},
+  onClear: () => {},
+})
+let thumbCount = 0
+let thumbDoubleClick = 0
+walkElements(stripTree, (element) => {
+  const className = element.props?.className
+  if (typeof className === 'string' && className.includes('histItem')) {
+    thumbCount += 1
+    if (typeof element.props?.onDoubleClick === 'function') thumbDoubleClick += 1
+  }
+})
+check(thumbCount === 1, `历史缩略图按钮找到 1 个（实际 ${thumbCount}）`)
+check(thumbDoubleClick === 0, '历史缩略图没有双击打开（老板只要舞台大图）')
+
 
 // ---------------------------------------------------------------------------
 // 结果行第二行：这张图当时用的模型与参数（老板截图里红线标出的位置）
@@ -921,7 +1030,7 @@ const config = {
   hasKey: true,
   keyHint: 'sk-or-v1-••••••••4f2a',
   model: 'google/gemini-3-pro-image',
-  autoSaveDir: 'D:\\DSH\\.dsh-imagegen\\out\\',
+  autoSaveDir: 'C:\\Users\\you\\.dsh-imagegen\\out\\',
   extraJson: '{}',
   timeoutSec: 180,
   outputFormat: 'png',
@@ -1050,6 +1159,17 @@ check(cssText.includes('--dsw-alias-bg-base'), '注入的 CSS 使用 DSH design 
 check(cssText.includes('stageInnerErr'), 'CSS 里有错误态的滚动布局')
 check(cssText.includes('logModal'), 'CSS 里有日志抽屉的弹层宽度')
 check(cssText.includes('logErr'), 'CSS 里有错误行着色')
+// 2026-10-18 三项改动的样式前提：左栏容器在、行内提示有错误色、浮条样式已下线。
+check(cssText.includes('panel_leftCol'), 'CSS 里有左栏容器（页头与输入区同栏）')
+check(cssText.includes('noticeErr'), 'CSS 里有行内提示的错误色')
+check(cssText.includes('panel_notice'), 'CSS 里有行内提示样式')
+check(!cssText.includes('panel_toast'), 'CSS 里不再留着悬空的 .toast 规则（底部浮条已下线）')
+check(!cssText.includes('panel_headActions'), 'CSS 里不再留着悬空的 .headActions 规则')
+// 2026-10-18 复验发现的问题：长提示把「历史记录 / 最近 N 张」挤成两行、行高 22 → 44px，
+// 而舞台是弹性项 —— 多出来的高度直接从预览区扣回去。修法就是给历史行加 nowrap
+// （标签的 min-content 变成整串文本、缩不动，负余量只能由提示自己吸收）。
+const historyHeadRule = /\.panel_historyHead\s*\{([^}]*)\}/u.exec(cssText)?.[1] ?? ''
+check(historyHeadRule.includes('white-space: nowrap'), '「历史记录」行不换行（长提示撑不高这一行）')
 
 // ------------------------------------------------------------------ 汇总
 

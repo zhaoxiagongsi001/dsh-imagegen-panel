@@ -27,7 +27,7 @@ import { createHttpBackend } from './api.ts'
 import { ArtDefs } from './art.tsx'
 import { Composer, prepareReference, referenceLimit, referencesRequired, type ParamState, type Reference } from './Composer.tsx'
 import { ConfigModal } from './ConfigModal.tsx'
-import { CheckIcon, GearIcon, WarnIcon } from './icons.tsx'
+import { WarnIcon } from './icons.tsx'
 import { fieldLabelOf } from './labels.ts'
 import { DEFAULT_CONFIG } from './defaults.ts'
 import { HistoryMenu, ResultStage } from './ResultStage.tsx'
@@ -319,7 +319,12 @@ const panelStore: PanelStore = {
   models: [],
 }
 
-/** 轻提示。错误提示停留更久，且带警示图标。 */
+/**
+ * 轻提示。错误提示停留更久（见下面那个定时器）。
+ *
+ * 位置：2026-10-18 起显示在**「历史记录 · 最近 N 张」右边**（原来是浮在面板底部
+ * 的一块 toast），所以这里只是数据，渲染在 `ResultStage` 的历史行里。
+ */
 interface Toast {
   text: string
   kind: 'ok' | 'err'
@@ -1038,22 +1043,6 @@ export function ImageGenPanel(): React.JSX.Element {
     <div className={css.panel}>
       <ArtDefs />
 
-      <header className={css.head}>
-        <div className={css.headText}>
-          <div className={css.title}>生图</div>
-          <div className={css.sub}>提示词 / 参考图 → 生成 → 面板内预览 · 保存 · 历史</div>
-        </div>
-        <div className={css.headActions}>
-          <button className={css.chip} type="button" onClick={openConfig} title="切换本次使用的模型">
-            模型 <b>{config?.model ?? '未选择'}</b>
-          </button>
-          <button className={css.btn} type="button" onClick={openConfig}>
-            <GearIcon />
-            连接配置
-          </button>
-        </div>
-      </header>
-
       {hostError !== undefined && (
         <div className={css.guideErr}>
           <WarnIcon />
@@ -1071,56 +1060,74 @@ export function ImageGenPanel(): React.JSX.Element {
       )}
 
       <div className={css.body2}>
-        <Composer
-          prompt={prompt}
-          onPromptChange={(value) => {
-            markTouched()
-            setPrompt(value)
-            // 用户自己动手改了，就别再留着「撤销」去覆盖他的手改。
-            if (!optimizing) setUndoPrompt(undefined)
-          }}
-          onOptimize={() => { void runOptimize() }}
-          optimizing={optimizing}
-          canUndo={undoPrompt !== undefined}
-          onUndo={undoOptimize}
-          references={references}
-          onAddReference={(name, dataUrl, note) => {
-            if (references.length >= refLimit) return
-            markTouched()
-            setReferences((current) => [...current, {
-              id: `ref-${Date.now()}-${current.length}`,
-              name,
-              dataUrl,
-              ...note === undefined ? {} : { note },
-            }])
-          }}
-          onRemoveReference={(id) => {
-            markTouched()
-            setReferences((current) => current.filter((item) => item.id !== id))
-          }}
-          params={params}
-          onParamChange={(key, value) => {
-            markTouched()
-            setParams((current) => ({ ...current, [key]: value }))
-          }}
-          parameters={parameters}
-          extra={extra}
-          onExtraChange={(name, value) => {
-            markTouched()
-            setExtra((current) => ({ ...current, [name]: value }))
-          }}
-          {...referenceDeclaredMax <= refLimit ? {} : { referenceDeclaredMax }}
-          {...overriddenFields.length === 0 ? {} : { overriddenFields }}
-          onNotice={(text, kind) => { notify(text, kind ?? 'ok') }}
-          model={model}
-          running={run.kind === 'running'}
-          notConfigured={notConfigured}
-          onGenerate={() => { void generate() }}
-          onCancel={cancel}
-          onOpenModelPicker={openConfig}
-          lastSeconds={history[0]?.seconds}
-          outputFormat={config?.outputFormat}
+        {/*
+          左栏 = 页头 + 输入区。
+
+          页头原来横跨整宽、右上角钉着「模型」chip 与「连接配置」按钮，那一条的高度
+          是从右边预览区身上扣的（老板 2026-10-18：「释放右边预览图片的空间」）。
+          现在页头跟着左栏走，`.result` 成为 `.body2` 的第二个 grid 项、从面板最顶部
+          开始 —— 预览区多出的就是这个页头的高度。
+        */}
+        <div className={css.leftCol}>
+          <header className={css.head}>
+            <div className={css.headText}>
+              <div className={css.title}>生图</div>
+              <div className={css.sub}>提示词 / 参考图 → 生成 → 面板内预览 · 保存 · 历史</div>
+            </div>
+          </header>
+
+          <Composer
+            prompt={prompt}
+            onPromptChange={(value) => {
+              markTouched()
+              setPrompt(value)
+              // 用户自己动手改了，就别再留着「撤销」去覆盖他的手改。
+              if (!optimizing) setUndoPrompt(undefined)
+            }}
+            onOptimize={() => { void runOptimize() }}
+            optimizing={optimizing}
+            canUndo={undoPrompt !== undefined}
+            onUndo={undoOptimize}
+            references={references}
+            onAddReference={(name, dataUrl, note) => {
+              if (references.length >= refLimit) return
+              markTouched()
+              setReferences((current) => [...current, {
+                id: `ref-${Date.now()}-${current.length}`,
+                name,
+                dataUrl,
+                ...note === undefined ? {} : { note },
+              }])
+            }}
+            onRemoveReference={(id) => {
+              markTouched()
+              setReferences((current) => current.filter((item) => item.id !== id))
+            }}
+            params={params}
+            onParamChange={(key, value) => {
+              markTouched()
+              setParams((current) => ({ ...current, [key]: value }))
+            }}
+            parameters={parameters}
+            extra={extra}
+            onExtraChange={(name, value) => {
+              markTouched()
+              setExtra((current) => ({ ...current, [name]: value }))
+            }}
+            {...referenceDeclaredMax <= refLimit ? {} : { referenceDeclaredMax }}
+            {...overriddenFields.length === 0 ? {} : { overriddenFields }}
+            onNotice={(text, kind) => { notify(text, kind ?? 'ok') }}
+            model={model}
+            running={run.kind === 'running'}
+            notConfigured={notConfigured}
+            onGenerate={() => { void generate() }}
+            onCancel={cancel}
+            onOpenModelPicker={openConfig}
+            onOpenConfig={openConfig}
+            lastSeconds={history[0]?.seconds}
+            outputFormat={config?.outputFormat}
         />
+        </div>
 
         <ResultStage
           run={run}
@@ -1143,6 +1150,7 @@ export function ImageGenPanel(): React.JSX.Element {
             setPreviewId(undefined)
             notify('历史已清空（仅本次会话）')
           }}
+          {...toast === undefined ? {} : { notice: toast }}
         />
       </div>
 
@@ -1188,13 +1196,6 @@ export function ImageGenPanel(): React.JSX.Element {
 
       {logOpen && (
         <LogViewer backend={backend} onClose={() => { setLogOpen(false) }} />
-      )}
-
-      {toast !== undefined && (
-        <div className={toast.kind === 'err' ? `${css.toast} ${css.toastErr}` : css.toast}>
-          {toast.kind === 'err' ? <WarnIcon size={14} /> : <CheckIcon size={14} />}
-          {toast.text}
-        </div>
       )}
     </div>
   )

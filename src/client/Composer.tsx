@@ -8,7 +8,7 @@
  *   - 参考图只接受图片；超过上限直接拒绝并提示，不静默丢弃。
  */
 import { useRef } from 'react'
-import { CheckIcon, ChevronIcon, InfoIcon, ListIcon, PlusIcon, SparkIcon, StopIcon, WarnIcon } from './icons.tsx'
+import { CheckIcon, ChevronIcon, GearIcon, InfoIcon, ListIcon, PlusIcon, SparkIcon, StopIcon, WarnIcon } from './icons.tsx'
 import type { ModelOption, OutputFormat, ParameterField } from './types.ts'
 import css from './panel.module.css'
 
@@ -255,6 +255,14 @@ export interface ComposerProps {
   onCancel: () => void
   /** 展开模型下拉。 */
   onOpenModelPicker: () => void
+  /**
+   * 打开「连接配置」弹层（协议 / Base URL / API Key / 默认模型 / 自动保存目录 / 高级）。
+   *
+   * 这个按钮原来钉在**整宽页头**的右上角，2026-10-18 老板要求挪走 —— 页头那一行
+   * 的高度是从右边预览区身上扣的。现在它与模型 chip 同排：换模型和改配置本来就是
+   * 同一件事，凑在一起还省一次跨半屏的鼠标移动。
+   */
+  onOpenConfig: () => void
   /** 生成耗时提示用的上一条耗时（秒）。 */
   lastSeconds: number | undefined
   /**
@@ -761,11 +769,18 @@ export function Composer(props: ComposerProps): React.JSX.Element {
       </div>
 
       <div className={css.actions}>
-        <button className={css.chip} type="button" onClick={props.onOpenModelPicker} title="切换本次使用的模型">
-          <ListIcon />
-          模型 <b>{model?.id ?? '未选择'}</b>
-          <ChevronIcon />
-        </button>
+        {/* 模型行：切模型 + 打开连接配置（后者 2026-10-18 从整宽页头挪到这里）。 */}
+        <div className={css.modelRow}>
+          <button className={css.chip} type="button" onClick={props.onOpenModelPicker} title="切换本次使用的模型">
+            <ListIcon />
+            模型 <b>{model?.id ?? '未选择'}</b>
+            <ChevronIcon />
+          </button>
+          <button className={css.btn} type="button" onClick={props.onOpenConfig} title="协议 / Base URL / API Key / 默认模型 / 自动保存目录 / 高级">
+            <GearIcon />
+            连接配置
+          </button>
+        </div>
         <div className={css.genRow}>
           {props.running
             ? (

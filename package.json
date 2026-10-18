@@ -1,6 +1,6 @@
 {
   "name": "dsh-imagegen-panel",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Image generation panel for the DSH web GUI: a sidebar entry opens a full panel — prompt / reference images → generate → in-panel preview, save and history. The API key never leaves the host.",
   "type": "module",
   "main": "lib/index.js",
