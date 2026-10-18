@@ -397,6 +397,8 @@ export function toPanelDraft(raw: unknown): PanelDraft | undefined {
     },
     extra: toStringMap(source.extra) ?? {},
     lastGeneratedPrompt: asString(source.lastGeneratedPrompt, ''),
+    // 舞台恢复用的那根引用。旧宿主 / 旧草稿文件里没有这个键 → 空串 = 不恢复舞台。
+    lastImageId: asString(source.lastImageId, ''),
     updatedAt: typeof source.updatedAt === 'number' && Number.isFinite(source.updatedAt) ? source.updatedAt : 0,
   }
 }

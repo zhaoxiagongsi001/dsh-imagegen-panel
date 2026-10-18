@@ -1942,6 +1942,7 @@ const draftPut = await call(second.routes, API.draft, {
       params: { aspectRatio: '4:5', resolution: '2K', count: '3', quality: 'medium' },
       extra: { background: 'transparent' },
       lastGeneratedPrompt: '上一张成功生成用的提示词',
+      lastImageId: 'gen-mvdktm8p-0-ayls',
     },
   },
 })
@@ -1961,6 +1962,12 @@ checkEqual(
   '上一张成功生成用的提示词',
   '「最后一次成功生成用的提示词」存得住 —— 进面板时判「草稿生成过没有」就靠它',
 )
+// 2026-10-18 新增：回到面板时「舞台上摆哪张图」也靠草稿里这根引用。
+checkEqual(
+  draftRead.json().draft.lastImageId,
+  'gen-mvdktm8p-0-ayls',
+  '「最后一次成功生成的那张图 id」存得住 —— 切会话再回来 / 重启后舞台恢复靠它',
+)
 // 这份文件里**不该**有参考图：几 MB 的 data URL 会把这颗小 JSON 变成垃圾场。
 check(!readFileSync(draftFile, 'utf8').includes('data:image'), '草稿文件里没有参考图的 data URL')
 
@@ -1973,6 +1980,7 @@ const draftBad = await call(second.routes, API.draft, {
       params: { count: 42 },
       extra: { seed: 7, bad: null },
       lastGeneratedPrompt: ['不是字符串'],
+      lastImageId: 12345,
     },
   },
 })
@@ -1983,12 +1991,23 @@ checkEqual(draftBad.json().draft.params.aspectRatio, '', '缺失的比例收敛�
 checkEqual(draftBad.json().draft.extra.seed, '7', '数字额外字段收敛成字符串')
 checkEqual(draftBad.json().draft.extra.bad, undefined, 'null 取值的字段被丢掉')
 checkEqual(draftBad.json().draft.lastGeneratedPrompt, '', '数组不是字符串 → 收敛成空串')
+// 图片 id 非字符串 → 空串（后果只是「舞台不恢复」；拿一个假 id 去查图会渲染出裂图）。
+checkEqual(draftBad.json().draft.lastImageId, '', '非字符串的图片 id 收敛成空串（不拿假 id 去查图）')
 
 const draftHuge = await call(second.routes, API.draft, {
   method: 'PUT',
-  body: { draft: { prompt: 'x'.repeat(30000) } },
+  body: { draft: { prompt: 'x'.repeat(30000), lastImageId: 'z'.repeat(300) } },
 })
 checkEqual(draftHuge.json().draft.prompt.length, 20000, '超长提示词按上限截断（20000），不写爆这颗小 JSON')
+checkEqual(draftHuge.json().draft.lastImageId.length, 128, '超长图片 id 也按上限截断（128），不写爆这颗小 JSON')
+
+// 旧客户端（或升级前就存在的 draft.json）里没有这个键 —— 必须落成**空串**而不是缺字段：
+// 前端把 undefined 当成「没有候选」的判空会一路漏下去，空串才是明确的三态之一。
+const draftLegacy = await call(second.routes, API.draft, {
+  method: 'PUT',
+  body: { draft: { prompt: '老客户端写的草稿', lastGeneratedPrompt: '老客户端' } },
+})
+checkEqual(draftLegacy.json().draft.lastImageId, '', '不带 lastImageId 的草稿 → 落成空串（升级前的文件照样能读）')
 const draftOversize = await call(second.routes, API.draft, {
   method: 'PUT',
   body: { draft: { prompt: 'y'.repeat(300000) } },
@@ -2015,6 +2034,7 @@ globalThis.fetch = async (url, init) => {
         params: { aspectRatio: '16:9', resolution: '1K', count: '2', quality: 'high' },
         extra: { background: 'auto' },
         lastGeneratedPrompt: '客户端的上一句',
+        lastImageId: 'gen-mvdktm8p-0-ayls',
         updatedAt: 123,
       }
     : null
@@ -2026,6 +2046,10 @@ checkEqual(draftCalls[0].url, '/dsh-imagegen/draft', '客户端 loadDraft 打的
 checkEqual(loadedDraft?.params.count, '2', '客户端把草稿解析成 PanelDraft（参数原样）')
 checkEqual(loadedDraft?.extra.background, 'auto', '客户端解析草稿里的额外字段')
 checkEqual(loadedDraft?.lastGeneratedPrompt, '客户端的上一句', '客户端解析草稿里的 lastGeneratedPrompt')
+checkEqual(loadedDraft?.lastImageId, 'gen-mvdktm8p-0-ayls', '客户端解析草稿里的 lastImageId（舞台恢复的候选）')
+// 旧草稿文件 / 旧宿主里没有这个键 —— 必须给空串（= 不恢复舞台），不能是 undefined
+// （undefined 会一路传进 `stageImageIdFor` 的判空逻辑里，把一个「没有候选」变成怪状态）。
+checkEqual(client.toPanelDraft({ prompt: 'x' })?.lastImageId, '', '旧草稿没有 lastImageId → 空串（不是 undefined）')
 
 const loadedNoDraft = await draftBackend.loadDraft()
 checkEqual(loadedNoDraft, undefined, '宿主回 `draft: null` 时客户端给 undefined（= 还没有草稿）')
@@ -2035,11 +2059,13 @@ const savedDraft = await draftBackend.saveDraft({
   params: { aspectRatio: '1:1', resolution: '2K', count: '3', quality: 'low' },
   extra: { seed: '42' },
   lastGeneratedPrompt: '',
+  lastImageId: 'gen-写进去的',
   updatedAt: 0,
 })
 checkEqual(draftCalls[2].init?.method, 'PUT', '客户端 saveDraft 用 PUT')
 checkEqual(draftCalls[2].init?.headers?.['content-type'], 'application/json', 'saveDraft 带 JSON content-type')
 checkEqual(JSON.parse(draftCalls[2].init.body).draft.prompt, '写进去的提示词', 'saveDraft 的请求体形状是 { draft: … }')
+checkEqual(JSON.parse(draftCalls[2].init.body).draft.lastImageId, 'gen-写进去的', 'saveDraft 把 lastImageId 一起发给宿主')
 checkEqual(savedDraft, true, 'saveDraft 写成功返回 true')
 
 globalThis.fetch = async () => ({
@@ -2052,6 +2078,7 @@ const savedFailed = await draftBackend.saveDraft({
   params: { aspectRatio: '', resolution: '', count: '1', quality: '' },
   extra: {},
   lastGeneratedPrompt: '',
+  lastImageId: '',
   updatedAt: 0,
 })
 checkEqual(savedFailed, false, 'saveDraft 失败时返回 false 而**不抛**（草稿丢一份不该打断正在打字的人）')

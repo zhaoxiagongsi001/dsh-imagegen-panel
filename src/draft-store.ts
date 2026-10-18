@@ -56,6 +56,20 @@ export interface PanelDraft {
   extra: Record<string, string>
   /** 最后一次**成功生成**用的提示词（用来判断 {@link PanelDraft.prompt} 是不是新草稿）。 */
   lastGeneratedPrompt: string
+  /**
+   * 最后一次**成功生成**的那张图的 id（`''` = 还没有 / 用户点过「清空」）。
+   *
+   * 它只回答一个问题：**回到面板时舞台上该摆哪张图**。
+   *
+   * 为什么值得占一个字段（2026-10-18）：切到会话/新建会话会把面板卸载，再点「生图」
+   * 是重新挂载 —— 舞台原来一律是空的，老板看到的就是「刚才那张图不见了，得再生成一次
+   * 才又能看到图」。模块作用域只撑得住同一次 DSH 运行，重启后又回到空舞台，
+   * 所以这根「该恢复哪张图」的引用必须跟提示词一样落盘。
+   *
+   * 存的是 id 而不是图片本身：图片在 `out/` + `index.json` 里，这里只是指针，
+   * 不产生第二份数据（也不该让这颗小 JSON 长胖）。
+   */
+  lastImageId: string
   /** 服务端写入时间（毫秒）。 */
   updatedAt: number
 }
@@ -73,6 +87,7 @@ export function emptyPanelDraft(): PanelDraft {
     params: { aspectRatio: '', resolution: '', count: '1', quality: '' },
     extra: {},
     lastGeneratedPrompt: '',
+    lastImageId: '',
     updatedAt: 0,
   }
 }
@@ -130,6 +145,11 @@ export function coercePanelDraft(raw: unknown): PanelDraft {
     extra,
     // 上限与提示词一致：它本来就是「上一句提示词」。
     lastGeneratedPrompt: draftText(source.lastGeneratedPrompt, MAX_DRAFT_PROMPT),
+    // 图片 id 是宿主自己生成的短串（`gen-<36 进制时间>-<序号>-<随机>`，约 25 字符）。
+    // 128 是宽松上限：手改的文件塞进来一坨长文本也不该被存下去。
+    // 顺带一条：非字符串（数字 / 数组 / 对象）一律收敛成空串 —— 空的后果只是「舞台不恢复」，
+    // 比拿一个假 id 去查图、最后渲染出一个裂图要好。
+    lastImageId: draftText(source.lastImageId, 128),
     updatedAt: typeof source.updatedAt === 'number' && Number.isFinite(source.updatedAt) ? source.updatedAt : 0,
   }
 }

@@ -9,12 +9,21 @@
  *    本组件，但用户回到「生图」时提示词、参数、历史都应当还在（与真插件的预期一致）。
  *  - **跨 DSH 重启的只有草稿**（宿主 `draft.json`，见 `src/draft-store.ts`）。
  *    模块作用域撑不过一次重启，而「我上次写了一半的提示词」必须撑过去。
- *  - **进面板的初始态**（2026-10-11 老板拍板）：
- *      1. 上一次是**成功生成** → 提示词区与图像展示区都是空的；
+ *  - **进面板的初始态**（2026-10-11 定，2026-10-18 改了第 3 条）：
+ *      1. 上一次是**成功生成** → 提示词区是空的；
  *      2. 有一份**没生成过**的草稿（提示词 ≠ 最后一次成功生成用的那句）→ 提示词留着；
- *      3. 图像展示区**一律为空** —— 不再自动选中最新一张历史图（想看就点下面的缩略图）。
+ *      3. 图像展示区恢复**最后一次成功生成的那张图**（老板 2026-10-18 拍板）。
+ *         起因：点「新会话」再点回「生图」，面板是重新挂载的，舞台按老规则一律为空 ——
+ *         老板看到的就是「刚才那张图不见了，非得再生成一次才又能看到图」。
+ *         现在判据是草稿里的 `lastImageId`（跨 DSH 重启也活），恢复逻辑见
+ *         {@link stageImageIdFor}。
+ *         **仍然不认「历史列表里的第一张」** —— 进面板就当头看到一张别人写的、
+ *         或者更早的图，正是 2026-10-11 要避免的那件事；这里只认那根明确的引用。
  *  - **点历史记录**（2026-10-11）：提示词与该图的参数搬回工作区、图像上舞台；
  *    **设置区的模型不动** —— 那张图当时的模型与参数在结果行里如实显示。
+ *  - **回归历史**：进面板时只看那一根引用，所以「点了一张老图 → 切走 → 回来」会回到
+ *    **最后一次成功生成的那张**（不是刚才点开看的那张老图）。这是有意的：老板要的是
+ *    「刚才生成的图还在」，而把「随手上翻的一张老图」也记成进面板的落点会让语义变糊。
  *  - **组件卸载要取消在飞请求**：用一个递增的 run token 判定「这次结果还算不算数」，
  *    同时用 AbortController 真的把 HTTP 请求掐掉（阶段 4 一次生成可能要 90 秒，
  *    「取消」必须真取消，不能只是不看结果）。
@@ -54,6 +63,52 @@ function shortTime(ms: number): string {
   const date = new Date(ms)
   const pad = (value: number): string => String(value).padStart(2, '0')
   return `${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+/**
+ * 打一次**幂等的读**，失败就退避重试。
+ *
+ * 为什么需要它（2026-10-18）：挂载时那几跳是**并行**发出的，而面板完全可能正好落在
+ * 「宿主半边还没挂上路由」「上一跳被 abort」这类窗口里。原来的写法是读失败静默吞掉、
+ * **永不重试** —— 于是「历史是空的、舞台也是空的」这件事在用户眼里要等到**下一次
+ * 成功出图**（那条路径会无条件重读一次历史）才自愈，也就是老板报的那个现象。
+ *
+ * 只用于读接口（它们幂等，重试没有副作用）；**绝不用于生成** —— 那会变成一次点击
+ * 扣两次钱。目前只有挂载时的**历史**这一跳用它：配置读失败会明确显示「宿主路由不可用」，
+ * 草稿读失败保持内存状态，两者的失败都已经有看得见的落点，不需要靠重试去遮。
+ * @param read - 发起一次读。
+ * @param attempts - 总尝试次数（含第一次）。
+ * @param delays - 每次失败后的等待毫秒数（比尝试次数少一个）。
+ * @returns 第一次成功的结果。
+ * @throws 最后一次失败的原因。
+ */
+async function retryRead<T>(read: () => Promise<T>, attempts = 3, delays: number[] = [350, 900]): Promise<T> {
+  let last: unknown
+  for (let index = 0; index < attempts; index += 1) {
+    try {
+      return await read()
+    } catch (error) {
+      last = error
+      if (index < delays.length) await new Promise((resolve) => { setTimeout(resolve, delays[index]) })
+    }
+  }
+  throw last
+}
+
+/**
+ * 进面板时舞台上该摆哪张图（**纯函数，自检直接测它**）。
+ *
+ * 输入是「候选的那根引用」（草稿/模块作用域里的 `lastImageId`）与已经拿到的历史列表：
+ *  - 候选是空串 → 不给图（第一次用、或者用户点过「清空」）；
+ *  - 候选不在历史列表里 → 也不给图。**不硬塞**：id 失效（索引被轮转掉、图被删了）
+ *    时宁可给一块空舞台，也不要渲染一个必然裂掉的 `<img>`。
+ * @param candidate - 最后一次成功生成的那张图的 id。
+ * @param history - 当前已知的历史列表。
+ * @returns 该推上舞台的 id；没有就 undefined。
+ */
+export function stageImageIdFor(candidate: string, history: GeneratedImage[]): string | undefined {
+  if (candidate === '') return undefined
+  return history.some((item) => item.id === candidate) ? candidate : undefined
 }
 
 /**
@@ -292,6 +347,14 @@ interface PanelStore {
   extra: Record<string, string>
   references: Reference[]
   history: GeneratedImage[]
+  /**
+   * 最后一次**成功生成**的那张图的 id（`''` = 还没有 / 已清空）。
+   *
+   * 它是「切走再回来时舞台摆哪张」的**内存里那一份**。磁盘上的那份在宿主 `draft.json`
+   * （字段同名），两者分工：内存这份撑住同一次运行里的重新挂载，磁盘那份撑住重启 ——
+   * 出图后 400 ms 的防抖窗口里可能还没来得及落盘，所以**内存优先**。
+   */
+  lastImageId: string
   config: PanelConfig | undefined
   models: ModelOption[]
 }
@@ -310,6 +373,8 @@ const panelStore: PanelStore = {
   extra: {},
   references: [],
   history: [],
+  // 空 = 还没有成功生成过（或用户清空过）。舞台恢复的候选就是它。
+  lastImageId: '',
   // 用默认配置打底，而不是留 undefined。
   // 否则首帧（配置还没从宿主回来那几十毫秒）页头会闪一下「模型 未选择」。
   // 默认配置的 hasKey 是 false，所以这一帧仍然按「未配置」渲染 ——
@@ -339,16 +404,27 @@ export function ImageGenPanel(): React.JSX.Element {
   const [references, setReferences] = useState<Reference[]>(panelStore.references)
   const [history, setHistory] = useState<GeneratedImage[]>(panelStore.history)
   /**
+   * 「最后一次成功生成的那张图」的 id（舞台恢复的候选，见 {@link stageImageIdFor}）。
+   *
+   * 初始值取模块作用域里那份：同一次运行里切走再回来时，它是最新的（比磁盘新）。
+   */
+  const [lastImageId, setLastImageId] = useState(panelStore.lastImageId)
+  /**
    * 舞台上展示的那张。
    *
-   * **初始永远是 undefined**（老板拍板）：进面板就是一块空面板，历史里有图也不自动
-   * 选中 —— 想看哪张，点下面的缩略图。
+   * 初始值 = **最后一次成功生成的那张**（老板 2026-10-18 拍板）：
+   * 切到会话/新建会话会把面板卸载，回到「生图」是重新挂载 —— 这时舞台上应当还是
+   * 刚才那张图，而不是一块空面板。
    *
-   * 提示词的初始值则走 {@link promptForEntry}（拿模块作用域里那份先判一次），
-   * 这样「切走再切回来」时首帧就已经是最终结果，不会先闪一下上次的提示词
-   * 再被草稿接口清掉。宿主草稿回来后还会再判一次（重启后模块作用域是空的）。
+   * 首帧就能拿到它靠两件事同时成立：模块作用域里的 `lastImageId` 与 `history` 都在
+   * （`stageImageIdFor()` 只在候选确实在列表里时才给图）。所以「切走再回来」不会
+   * 先闪一下「还没有图片」再蹦出图；磁盘那份（草稿里的 `lastImageId`）是重启后的兜底。
+   *
+   * 提示词的初始值则走 {@link promptForEntry}（同样的思路），宿主草稿回来后还会再判一次。
    */
-  const [previewId, setPreviewId] = useState<string | undefined>(undefined)
+  const [previewId, setPreviewId] = useState<string | undefined>(
+    () => stageImageIdFor(panelStore.lastImageId, panelStore.history),
+  )
   const [config, setConfig] = useState<PanelConfig | undefined>(panelStore.config)
   const [models, setModels] = useState<ModelOption[]>(panelStore.models)
   const [run, setRun] = useState<RunState>({ kind: 'idle' })
@@ -449,6 +525,7 @@ export function ImageGenPanel(): React.JSX.Element {
   useEffect(() => { panelStore.extra = extra }, [extra])
   useEffect(() => { panelStore.references = references }, [references])
   useEffect(() => { panelStore.history = history }, [history])
+  useEffect(() => { panelStore.lastImageId = lastImageId }, [lastImageId])
   useEffect(() => { panelStore.config = config }, [config])
   useEffect(() => { panelStore.models = models }, [models])
 
@@ -462,9 +539,15 @@ export function ImageGenPanel(): React.JSX.Element {
    *  - `undefined` = 宿主明确回答「还没有草稿」（首次使用）。**读失败不算**
    *    —— 那种情况调用方直接跳过，保持内存里的状态不动，绝不能把用户手上的
    *    提示词当成「磁盘上没有」清掉。
+   *
+   * 另外它还负责**舞台恢复的候选**（`lastImageId`）：这一条**与用户有没有抢在草稿
+   * 之前动过手无关** —— 打字不影响「刚才那张图是哪张」，所以放在最前面、三个分支都吃。
    * @param draft - 宿主回的草稿。
    */
   const applyDraft = useCallback((draft: PanelDraft | undefined): void => {
+    // 只在内存里没有候选时才认磁盘那份：刚出图就切走时，磁盘上的草稿可能还在
+    // 400 ms 防抖窗口里（甚至没写成功），而模块作用域里那份一定是最新的。
+    if (panelStore.lastImageId === '') setLastImageId(draft?.lastImageId ?? '')
     // 用户抢在草稿之前动过手 → 只记「最后一次成功生成用的那句」（那是判据），
     // 提示词与参数一概不覆盖：他手上的东西比磁盘上那份新。
     if (touchedBeforeDraft.current) {
@@ -498,7 +581,9 @@ export function ImageGenPanel(): React.JSX.Element {
     void (async () => {
       const [configOutcome, historyOutcome, draftOutcome] = await Promise.allSettled([
         backend.loadConfig(controller.signal),
-        backend.listHistory(controller.signal),
+        // 历史这一跳要**能重试**：它失败原来是静默吞掉且永不重试，于是「面板回来
+        // 是空的」只能等下一次成功出图才自愈（见 retryRead 的注释）。
+        retryRead(() => backend.listHistory(controller.signal)),
         backend.loadDraft(controller.signal),
       ])
       if (!alive) return
@@ -510,10 +595,11 @@ export function ImageGenPanel(): React.JSX.Element {
         setHostError(configOutcome.reason instanceof Error ? configOutcome.reason.message : String(configOutcome.reason))
       }
 
-      // 历史：模块作用域里已经有就不用再灌一次（切面板回来时它更新）。
-      if (historyOutcome.status === 'fulfilled' && panelStore.history.length === 0) {
-        setHistory(historyOutcome.value)
-      }
+      // 历史：**无条件**灌一次。模块作用域那份只用来撑住首帧，不能拿它当真相 ——
+      // 索引是宿主的磁盘文件，别的实例/上一轮都可能改过它（原来那句「模块缓存非空
+      // 就不读宿主」会让「回来时看到的是旧列表」变成一个查不出的怪事）。
+      // 读失败时保持现状：模块作用域那份还在，不会把已经画出来的缩略图抹掉。
+      if (historyOutcome.status === 'fulfilled') setHistory(historyOutcome.value)
 
       // 草稿：读成功才动面板状态；读失败保持现状（见 applyDraft 的注释）。
       if (draftOutcome.status === 'fulfilled') applyDraft(draftOutcome.value)
@@ -528,14 +614,14 @@ export function ImageGenPanel(): React.JSX.Element {
   // 草稿自动落盘（防抖 400 ms）。**读完之前绝不回写**，理由见 draftReady 的注释。
   useEffect(() => {
     if (!draftReady.current) return undefined
-    pendingDraft.current = { prompt, params, extra, lastGeneratedPrompt, updatedAt: 0 }
+    pendingDraft.current = { prompt, params, extra, lastGeneratedPrompt, lastImageId, updatedAt: 0 }
     const timer = window.setTimeout(() => {
       const draft = pendingDraft.current
       pendingDraft.current = undefined
       if (draft !== undefined) void backend.saveDraft(draft)
     }, 400)
     return () => { window.clearTimeout(timer) }
-  }, [prompt, params, extra, lastGeneratedPrompt])
+  }, [prompt, params, extra, lastGeneratedPrompt, lastImageId])
 
   // 卸载时把防抖窗口里那一份补上：敲完最后一个字就切走/关窗，改动不该丢。
   useEffect(() => () => {
@@ -645,6 +731,27 @@ export function ImageGenPanel(): React.JSX.Element {
     [history, previewId],
   )
 
+  /**
+   * 舞台恢复：把「最后一次成功生成的那张」重新推上舞台。
+   *
+   * 为什么要有这个 effect（而不是挂载时算一次就完）：历史的到达**顺序不定** ——
+   *  - 同一次运行里重新挂载：`useState` 的初值已经带上了（这里是空转）；
+   *  - DSH 重启后：模块作用域是空的，历史要从宿主读回来、候选 id 要等草稿落地；
+   *  - 出图后重读历史（`n > 1`）：整个列表会被替换。
+   * 统一在这里补一刀，上面任何一种顺序都能收敛到「那张图在舞台上」。
+   *
+   * 三条刻意的边界：
+   *  1. 用户自己选过图（`previewId` 有值）就不再抢 —— 他点哪张就是哪张；
+   *  2. 点「清空」会把 `lastImageId` 一起清掉，所以清空之后不会在这里自己长回来；
+   *  3. 候选不在历史里就什么都不做（见 {@link stageImageIdFor}），不硬塞一个必然裂掉的图。
+   */
+  useEffect(() => {
+    if (previewId !== undefined) return
+    const wanted = stageImageIdFor(lastImageId, history)
+    if (wanted === undefined) return
+    setPreviewId(wanted)
+  }, [history, lastImageId, previewId])
+
   const notConfigured = config === undefined || !config.hasKey
 
   // --------------------------------------------------------------- 生成
@@ -687,6 +794,14 @@ export function ImageGenPanel(): React.JSX.Element {
       if (runToken.current !== token) return
       setHistory((current) => [image, ...current])
       setPreviewId(image.id)
+      /**
+       * 记下「最后一次成功生成的是哪张」。
+       *
+       * 它就是**舞台恢复**的判据：切到会话再回来（面板重新挂载）、甚至重启 DSH，
+       * 舞台上摆的都是这张。跟着草稿一起落盘（400 ms 防抖），所以「刚出图就切走」
+       * 也不会丢 —— 内存那份比磁盘新，见 applyDraft。
+       */
+      setLastImageId(image.id)
       setRun({ kind: 'done', image })
       /**
        * 记下「最后一次成功生成用的是哪句提示词」。
@@ -1148,6 +1263,22 @@ export function ImageGenPanel(): React.JSX.Element {
           onClearHistory={() => {
             setHistory([])
             setPreviewId(undefined)
+            // 舞台的恢复候选要一起清掉：只清预览的话，下次进面板它又会自己长回来
+            // （`lastImageId` 还指着那张图）—— 那就不叫「清空」了。
+            setLastImageId('')
+            /**
+             * 立刻落一次盘，不等 400 ms 防抖。
+             *
+             * 为什么（2026-10-18 独立复验挑出的窄窗口）：清空只改内存时，若在这 400 ms 里
+             * 刷新页面 / 重启 DSH，磁盘上那份草稿还是旧 id —— 重挂载时 `applyDraft` 会把它
+             * 认回来，那张图就自己长回舞台了。这里补一次立即写，把窗口从 400 ms 压到一次
+             * HTTP 往返（防抖那次照旧会再写一遍，内容相同，无害）。
+             *
+             * 同时把防抖窗口里那份**清掉**：卸载时的补写用的是 `pendingDraft.current`，
+             * 留着旧的 lastImageId 会把上面这次立即写又覆盖回去。
+             */
+            pendingDraft.current = undefined
+            void backend.saveDraft({ prompt, params, extra, lastGeneratedPrompt, lastImageId: '', updatedAt: 0 })
             notify('历史已清空（仅本次会话）')
           }}
           {...toast === undefined ? {} : { notice: toast }}

@@ -105,7 +105,7 @@ export function apply(ctx: ClientContext | ClientContextLike): void {
 // 真实渲染面板、断言槽位注册参数、并把「客户端打的路径」与「宿主挂的路径」逐字比对，
 // 从而不必每次改动都去动老板的 GUI。
 export { PANEL_ID, SidebarIcon }
-export { ImageGenPanel, promptForEntry, paramsFromHistory } from './ImageGenPanel.tsx'
+export { ImageGenPanel, promptForEntry, paramsFromHistory, stageImageIdFor } from './ImageGenPanel.tsx'
 export { Composer, MAX_REFERENCES } from './Composer.tsx'
 export { ResultStage, HistoryStrip, HistoryMenu, HistoryFacts } from './ResultStage.tsx'
 export { ConfigModal } from './ConfigModal.tsx'

@@ -238,6 +238,14 @@ export interface PanelDraft {
   extra: Record<string, string>
   /** 最后一次**成功生成**用的提示词。 */
   lastGeneratedPrompt: string
+  /**
+   * 最后一次**成功生成**的那张图的 id（`''` = 还没有 / 已清空）。
+   *
+   * 面板重挂载（切会话再回来）或 DSH 重启后，舞台靠它把那张图找回来 ——
+   * 见 `ImageGenPanel.tsx` 的 `stageImageIdFor()`。旧版本落的盘里没有这个键，
+   * 解析时按空串处理（= 舞台不恢复，其余行为不变）。
+   */
+  lastImageId: string
   /** 服务端写入时间（毫秒）；`0` = 还没有草稿。 */
   updatedAt: number
 }

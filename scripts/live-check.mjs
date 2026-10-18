@@ -154,23 +154,62 @@ if (Array.isArray(history.json?.images) && history.json.images.length > 0) {
   check(imageBytes.length > 1000, `图片字节数合理（${imageBytes.length} B）`)
   check(imageBytes.subarray(0, 4).toString('hex') === '89504e47' || imageResponse.headers.get('content-type') !== 'image/png', 'PNG 文件头正确')
 
-  // 阶段 5：「保存」按钮走的那条路由。用显式 target 指向系统临时目录 ——
-  // 真机验收不该往老板的工作区目录里塞副本（那正是「自动保存目录」的行为，
-  // 但那是生成时的事，验收脚本不替用户做这个决定）。
-  const saveDir = path.join(tmpdir(), 'dsh-imagegen-livecheck')
-  const saveResponse = await call('/dsh-imagegen/save', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ id: first.id, target: saveDir }),
-  })
-  checkEqual(saveResponse.status, 200, 'POST /save 返回 200')
-  const savedPath = saveResponse.json?.savedPath ?? ''
-  check(savedPath.startsWith(saveDir), `保存到指定目录（${savedPath}）`)
-  check(existsSync(savedPath), '保存出来的文件确实存在')
-  if (existsSync(savedPath)) {
-    checkEqual(readFileSync(savedPath).length, imageBytes.length, '保存的副本与原图字节数一致')
-    rmSync(savedPath, { force: true })
+  /**
+   * 阶段 5：「保存」按钮走的那条路由（`POST /save`）。
+   *
+   * ⚠️ 这条探针**有副作用**，而且已经踩过一次：宿主保存成功后会
+   * `patchIndexEntry(id, { autoSavedPath })` —— 索引里那张图的「已自动保存到 …」会被改成
+   * 本次探针的临时目录，而副本紧接着被 rmSync 删掉。2026-10-18 复验时查到：历代 live-check
+   * 一共在索引里留下 7 个指向 `%TEMP%\dsh-XXXX\dsh-imagegen-livecheck\…` 的死路径
+   * （面板结果行会显示一个根本不存在的路径）。
+   *
+   * 所以现在的做法是：**只挑一个「autoSavedPath 指向真实文件」的条目**来探，
+   * 探完立刻用同一条路由把原值写回，并断言索引确实回到探针前的样子。
+   * 找不到这样的条目就跳过成功路径 —— 宿主没有「清掉 autoSavedPath」的路由，
+   * 一旦写进去就再也去不掉，宁可不探（404 那条分支照旧会跑）。
+   */
+  const historyImages = history.json.images
+  const saveProbe = historyImages.find((item) =>
+    typeof item.autoSavedPath === 'string' && item.autoSavedPath !== '' && existsSync(item.autoSavedPath)) ?? null
+
+  if (saveProbe === null) {
+    console.log('      没有「autoSavedPath 指向真实文件」的历史条目 → 跳过 /save 成功路径探针（它会往索引里写值且无法还原）')
+  } else {
+    // 用显式 target 指向系统临时目录 —— 真机验收不该往老板的工作区目录里塞副本
+    // （那正是「自动保存目录」的行为，但那是生成时的事，验收脚本不替用户做这个决定）。
+    const saveDir = path.join(tmpdir(), 'dsh-imagegen-livecheck')
+    const saveResponse = await call('/dsh-imagegen/save', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id: saveProbe.id, target: saveDir }),
+    })
+    checkEqual(saveResponse.status, 200, 'POST /save 返回 200')
+    const savedPath = saveResponse.json?.savedPath ?? ''
+    check(savedPath.startsWith(saveDir), `保存到指定目录（${savedPath}）`)
+    check(existsSync(savedPath), '保存出来的文件确实存在')
+    if (existsSync(savedPath)) {
+      checkEqual(
+        readFileSync(savedPath).length,
+        readFileSync(saveProbe.savedPath).length,
+        '保存的副本与原图字节数一致',
+      )
+      rmSync(savedPath, { force: true })
+    }
+
+    // 还原：target 给**原来那个目录**，宿主就会把 autoSavedPath 写回原字符串。
+    const restore = await call('/dsh-imagegen/save', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id: saveProbe.id, target: path.dirname(saveProbe.autoSavedPath) }),
+    })
+    checkEqual(restore.status, 200, '探针副作用已回写（用同一条路由把 autoSavedPath 还原）')
+    checkEqual(
+      restore.json?.savedPath,
+      saveProbe.autoSavedPath,
+      `索引里的 autoSavedPath 回到探针前的值（${saveProbe.autoSavedPath}）`,
+    )
   }
+
   checkEqual((await call('/dsh-imagegen/save', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: 'no-such-id' }) })).status, 404, '/save 未知 id → 404')
 } else {
   console.log('      还没出过图 → 跳过图片路由断言')
@@ -558,6 +597,9 @@ const probeDraft = {
   params: { aspectRatio: '4:5', resolution: '2K', count: '2', quality: 'medium' },
   extra: { background: 'opaque' },
   lastGeneratedPrompt: 'live-check 上一句',
+  // 2026-10-18 新增：回到面板时「舞台摆哪张图」靠这根引用。**它是本套件里唯一
+  // 依赖「宿主已重启到新构建」的断言** —— 老宿主不认识这个键、会把它丢掉。
+  lastImageId: 'gen-livecheck-probe',
 }
 const draftPut = await call('/dsh-imagegen/draft', {
   method: 'PUT',
@@ -572,12 +614,17 @@ checkEqual(draftAfter.json?.draft?.prompt, probeDraft.prompt, '草稿写得进�
 checkEqual(draftAfter.json?.draft?.params?.aspectRatio, '4:5', '草稿里的参数存得住')
 checkEqual(draftAfter.json?.draft?.extra?.background, 'opaque', '草稿里的额外字段存得住')
 checkEqual(draftAfter.json?.draft?.lastGeneratedPrompt, probeDraft.lastGeneratedPrompt, '「最后一次成功生成用的提示词」存得住')
+checkEqual(
+  draftAfter.json?.draft?.lastImageId,
+  probeDraft.lastImageId,
+  '「最后一次成功生成的那张图 id」存得住（切会话再回来 / 重启后舞台恢复靠它）',
+)
 
 // 还原（没有原草稿就写回一份空的，让面板回到「没有草稿」的状态）。
 const restored = await call('/dsh-imagegen/draft', {
   method: 'PUT',
   headers: { 'content-type': 'application/json' },
-  body: JSON.stringify({ draft: draftBackup ?? { prompt: '', params: { aspectRatio: '', resolution: '', count: '1', quality: '' }, extra: {}, lastGeneratedPrompt: '' } }),
+  body: JSON.stringify({ draft: draftBackup ?? { prompt: '', params: { aspectRatio: '', resolution: '', count: '1', quality: '' }, extra: {}, lastGeneratedPrompt: '', lastImageId: '' } }),
 })
 checkEqual(restored.status, 200, '草稿已还原成检查前的样子')
 

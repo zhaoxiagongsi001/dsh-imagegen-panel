@@ -217,11 +217,12 @@ check(panel.includes('disabled'), '未配置时生成按钮为 disabled')
 const textarea = /<textarea[^>]*>([\s\S]*?)<\/textarea>/u.exec(panel)
 check(textarea !== null && textarea[1].trim() === '', '首帧提示词框是空的（不再把演示文案当内容填进去）')
 
-// 进面板的初始态是「提示词按草稿、舞台一律为空」。前者由 promptForEntry 的用例覆盖，
-// 后者是结构性的（挂载 effect 里不再自动选中最新历史图）—— 用源码级断言守住它，
-// 免得哪天又有人把「历史有图就自动上图」加回来。
+// 进面板的初始态：提示词按草稿走（promptForEntry 的用例覆盖），舞台按草稿里那根
+// `lastImageId` 走（stageImageIdFor 的用例 + 下面第 ④ 组覆盖）。
+// 这条断言守的是**另一件事**：不许再出现「历史有图就自动把最新一张推上舞台」那段代码 ——
+// 那正是 2026-10-11 要避免、2026-10-18 也没有恢复的行为（恢复的只有那一根明确的引用）。
 const panelSource = readFileSync(path.join(root, 'src', 'client', 'ImageGenPanel.tsx'), 'utf8')
-check(!panelSource.includes('seeded[0]'), '没有「首屏自动选中最新一张历史图」那段代码（图像展示区进面板一律为空）')
+check(!panelSource.includes('seeded[0]'), '没有「首屏自动选中最新一张历史图」那段代码（只认草稿里的 lastImageId）')
 
 // Composer：已配置、可生成。
 const params = { aspectRatio: '16:9', resolution: '1K', count: '1', quality: '高' }
@@ -939,11 +940,12 @@ const olderFacts = render(h(clientExports.HistoryFacts, { image: baseImage }), '
 checkContains(olderFacts, '模型未记录', '连模型都没有的条目也说清楚')
 
 // ---- 进面板时提示词该不该在（纯函数） ----
-const draftOf = (prompt, lastGeneratedPrompt) => ({
+const draftOf = (prompt, lastGeneratedPrompt, lastImageId = '') => ({
   prompt,
   params: { aspectRatio: '16:9', resolution: '1K', count: '1', quality: 'high' },
   extra: {},
   lastGeneratedPrompt,
+  lastImageId,
   updatedAt: 1,
 })
 
@@ -958,6 +960,24 @@ check(
   '只差首尾空白不算「我改了」（按 trim 比）',
 )
 check(clientExports.promptForEntry(draftOf('', '上一句')) === '', '输入框被清空 → 就是空的')
+
+// ---- 进面板时舞台该摆哪张图（纯函数，2026-10-18） ----
+//
+// 老板报的现象：点「新会话」再点回「生图」，刚才那张图不见了，非得再生成一次才又能看到。
+// 根因是舞台的初始值恒为 undefined（老规则「进面板一律空」）。现在的判据是草稿里那根
+// `lastImageId`，落点由这个纯函数算 —— 四个分支就是它的全部语义。
+const stageA = { ...baseImage, id: 'gen-a' }
+const stageB = { ...baseImage, id: 'gen-b' }
+check(clientExports.stageImageIdFor('', [stageA]) === undefined, '没有候选（第一次用 / 清空过）→ 舞台不摆图')
+check(clientExports.stageImageIdFor('gen-a', [stageA, stageB]) === 'gen-a', '候选在历史里 → 摆它')
+check(
+  clientExports.stageImageIdFor('gen-b', [stageA, stageB]) === 'gen-b',
+  '候选不是列表第一张也照样认（只认那根明确的引用，不认「最新一张」）',
+)
+check(
+  clientExports.stageImageIdFor('gen-gone', [stageA]) === undefined,
+  '候选已经不在历史里 → 不硬塞（宁可空舞台，也不渲染一张必然裂掉的图）',
+)
 
 // ---- 点历史图时参数怎么回填（纯函数） ----
 const paramField = (name, label, extra = {}) => ({
@@ -1170,6 +1190,54 @@ check(!cssText.includes('panel_headActions'), 'CSS 里不再留着悬空的 .hea
 // （标签的 min-content 变成整串文本、缩不动，负余量只能由提示自己吸收）。
 const historyHeadRule = /\.panel_historyHead\s*\{([^}]*)\}/u.exec(cssText)?.[1] ?? ''
 check(historyHeadRule.includes('white-space: nowrap'), '「历史记录」行不换行（长提示撑不高这一行）')
+
+// ---- ④ 舞台恢复：跨重挂载 / 跨 DSH 重启（2026-10-18） ----
+//
+// 为什么这里只能做源码级断言：这条行为完全长在 effect 与模块作用域上
+// （`renderToStaticMarkup` 不跑 effect，`panelStore` 也不对外导出），而它正是老板报的
+// 那个 bug 的修复本体。所以逐条把「接线」钉住，纯函数那半边在上面已经测过，
+// 真机行为（点新会话再点回生图）留给重启后的 live 验收。
+check(
+  /panelStore\.lastImageId\s*=\s*lastImageId/u.test(panelSource),
+  'lastImageId 回写模块作用域（同一次运行里切走再回来靠它）',
+)
+check(
+  panelSource.includes('lastGeneratedPrompt, lastImageId, updatedAt: 0'),
+  '草稿落盘带着 lastImageId（跨 DSH 重启靠它）',
+)
+check(
+  panelSource.includes('lastGeneratedPrompt, lastImageId]'),
+  'lastImageId 一变就重落一次草稿（出图后 400ms 内落盘）',
+)
+check(
+  panelSource.includes("if (panelStore.lastImageId === '') setLastImageId(draft?.lastImageId ?? '')"),
+  '内存里的候选优先于磁盘（刚出图就切走时磁盘那份可能还在防抖窗口里）',
+)
+check(panelSource.includes('setLastImageId(image.id)'), '出图成功就记下这张的 id（舞台恢复的判据）')
+check(
+  panelSource.includes('stageImageIdFor(lastImageId, history)'),
+  '历史到达后补一次舞台恢复（历史与草稿的到达顺序不定）',
+)
+// 「清空」这三条按**处理函数体内**断言，不按全文 —— `pendingDraft.current = undefined`
+// 这类字串在别处也有，全文 grep 证明不了它是清空做的。
+const clearHandler = /onClearHistory=\{\(\) => \{([\s\S]*?)\n          \}\}/u.exec(panelSource)?.[1] ?? ''
+check(clearHandler.includes("setLastImageId('')"), '「清空」把恢复候选一起清掉（否则下次进面板它自己长回来）')
+check(
+  clearHandler.includes('backend.saveDraft('),
+  '「清空」立刻落一次盘（2026-10-18 复验的窄窗口：只改内存时，400ms 内刷新那张图会自己长回来）',
+)
+check(
+  clearHandler.includes('pendingDraft.current = undefined'),
+  '「清空」把防抖窗口里那份清掉（否则卸载时的补写会把上面那次立即写覆盖回去）',
+)
+check(
+  panelSource.includes('retryRead(() => backend.listHistory(controller.signal))'),
+  '挂载读历史失败会重试（不再是「静默失败 + 永不重试」）',
+)
+check(
+  !panelSource.includes('panelStore.history.length === 0'),
+  '不再拿「模块缓存非空」当理由跳过宿主历史（磁盘索引才是权威）',
+)
 
 // ------------------------------------------------------------------ 汇总
 
