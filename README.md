@@ -251,6 +251,7 @@ scripts/
   live-check.mjs           真机验收（打运行中的 DSH，自带清理与配置/草稿还原）
   preview.mjs              生成离屏预览页（18 个状态）
   param-matrix.mjs         生成逐模型参数矩阵（数据源，见 PARAM-MATRIX.md）
+  screenshots.mjs          从离屏预览页重出 README 的三张展示图（只用中性占位路径）
 ```
 
 ---
